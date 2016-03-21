@@ -1,0 +1,68 @@
+#!/bin/bash
+
+set -e
+
+TOPDIR=`pwd`
+
+module load pegasus/4.6.0cvs
+
+RUN_ID=tophat-`date +'%s'`
+
+RUN_DIR=/home/$USER/workflows/$RUN_ID
+mkdir -p $RUN_DIR
+# but offload data to stash
+for ENTRY in data scratch; do
+    mkdir -p /stash2/user/$USER/public/$RUN_ID/$ENTRY
+    ln -s /stash2/user/$USER/public/$RUN_ID/$ENTRY $RUN_DIR/$ENTRY
+done
+mkdir -p $RUN_DIR/scratch/$RUN_ID/level-2
+
+# generate the dax
+export PYTHONPATH=`pegasus-config --python`
+./tools/dax-level-1 $RUN_ID $RUN_DIR $RUN_DIR/data
+
+# create the site catalog
+cat >sites.xml <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<sitecatalog xmlns="http://pegasus.isi.edu/schema/sitecatalog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pegasus.isi.edu/schema/sitecatalog http://pegasus.isi.edu/schema/sc-4.0.xsd" version="4.0">
+
+    <site  handle="local" arch="x86_64">
+        <directory type="shared-scratch" path="$RUN_DIR/scratch">
+            <file-server operation="all" url="file://$RUN_DIR/scratch"/>
+        </directory>
+        <directory type="local-storage" path="$RUN_DIR/outputs">
+            <file-server operation="all" url="file://$RUN_DIR/outputs"/>
+        </directory>
+        <profile namespace="pegasus" key="SSH_PRIVATE_KEY" >/home/$USER/.ssh/workflow</profile>
+        <profile namespace="env" key="PATH" >$PATH</profile>
+    </site>
+
+    <site  handle="stash" arch="x86_64" os="LINUX">
+        <directory type="shared-scratch" path="/stash2/user/$USER/public">
+            <file-server operation="get" url="http://stash.ci-connect.net/~$USER"/>
+            <file-server operation="put" url="scp://$USER@login02.osgconnect.net/stash2/user/$USER/public"/>
+        </directory>
+    </site>
+
+    <site  handle="condorpool" arch="x86_64" os="LINUX">
+        <profile namespace="pegasus" key="style" >condor</profile>
+        <profile namespace="condor" key="universe" >vanilla</profile>
+        <profile namespace="condor" key="requirements" >OSGVO_OS_STRING == "RHEL 6" &amp;&amp; HAS_MODULES == True &amp;&amp; GLIDEIN_ResourceName != "Hyak" &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName1 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName2 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName3 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName4</profile>
+        <profile namespace="condor" key="request_memory" >5 GB</profile>
+        <profile namespace="condor" key="request_disk" >10 GB</profile>
+    </site>
+
+</sitecatalog>
+EOF
+
+# plan and submit the  workflow
+pegasus-plan \
+    --conf pegasus.conf \
+    --relative-dir $RUN_ID \
+    --sites condorpool \
+    --staging-site stash \
+    --output-site local \
+    --dir $RUN_DIR/workflow \
+    --dax dax.xml \
+    --submit
+

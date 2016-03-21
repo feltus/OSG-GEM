@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -e
+
+module load samtools/0.1.17
+module load java/8u25
+
+# 1 input file is possible, but samtools can't handle that
+COUNT=`ls *.bam | wc -l`
+if [ $COUNT = 1 ]; then
+    cp *.bam $1-merged.bam
+    exit 0
+fi
+
+# remove "empty" inputs
+for F in `ls *bam`; do
+	SIZE=`du -sb $F | cut -f 1`
+	if [ $SIZE -lt 50 ]; then
+		rm $F
+	fi
+done
+
+echo
+echo
+ls -l
+echo
+echo
+
+# no input files left
+COUNT=`ls *.bam 2>/dev/null | wc -l`
+if [ $COUNT = 0 ]; then
+    touch $1-merged.bam
+    exit 0
+fi
+
+samtools merge $1-merged.bam *.bam
+

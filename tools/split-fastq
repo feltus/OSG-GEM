@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -e
+
+MAX_SEQ=$1
+IN_FILE=$2
+
+# gzip input
+if (file $IN_FILE | grep gzip) >/dev/null 2>&1; then
+    gunzip $IN_FILE
+    IN_FILE=`ls *.fastq`
+fi
+
+#chmod +x split
+#./split $MAX_SEQ $IN_FILE
+
+./fastq-splitter.pl --n-parts $MAX_SEQ $IN_FILE
+
+echo
+ls -l 
+echo
+
+rm -f $IN_FILE
+
+# gzip the results
+for F in `ls *.fastq`; do
+    echo "Gzipping $F ..."
+    gzip $F
+done
+

@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -e
+
+module load tophat/2.0.13
+module load samtools/0.1.17
+module load bowtie/2.2.3
+module load java/8u25
+
+set -v
+
+CONNECT_USER=$1
+RUN_ID=$2
+BASE_NAME=$3
+PART=$4
+COMMON_NAME=$5
+
+java -Xmx512m \
+     -jar trimmomatic-0.33.jar PE -threads 1 -phred33 \
+     forward-$COMMON_NAME.gz reverse-$COMMON_NAME.gz \
+     left_result.paired_trim.forward_$COMMON_NAME.fastq.gz left_result.unpaired_trim.forward_$COMMON_NAME.fastq.gz \
+     right_result.paired_trim.reverse_$COMMON_NAME.fastq.gz right_result.unpaired_trim.reverse_$COMMON_NAME.fastq.gz \
+     ILLUMINACLIP:fasta_adapter.txt:2:40:15 LEADING:3 TRAILING:6 SLIDINGWINDOW:4:15 MINLEN:50
+
+# empty outputs?
+LEFT_SIZE=`du -sb left_result.paired_trim.forward_$COMMON_NAME.fastq.gz | cut -f 1`
+RIGHT_SIZE=`du -sb right_result.paired_trim.reverse_$COMMON_NAME.fastq.gz | cut -f 1`
+if [ $LEFT_SIZE -lt 50 -o $RIGHT_SIZE -lt 50 ]; then
+    echo "Warning: trimmomatic output was 0 sequences"
+    touch $COMMON_NAME-accepted_hits.bam
+    exit 0
+fi
+
+
+mkdir work-$$
+
+tophat2 --no-coverage-search -o work-$$ ./Medtr \
+        left_result.paired_trim.forward_$COMMON_NAME.fastq.gz \
+        right_result.paired_trim.reverse_$COMMON_NAME.fastq.gz
+
+echo
+find work-$$
+echo
+
+# we only need the accepted hits, but it needs a unique name
+cp work-$$/accepted_hits.bam $COMMON_NAME-accepted_hits.bam
+
+

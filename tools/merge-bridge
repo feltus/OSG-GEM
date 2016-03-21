@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+CONNECT_USER="$1"
+RUN_ID="$2"
+RUN_DIR="$3"
+BASE_NAME="$4"
+
+START_DIR=`pwd`
+
+cd /stash2/user/$CONNECT_USER/public/$RUN_ID/level-2
+
+for DIR in `ls -d $BASE_NAME-*`; do
+    cd $DIR
+    cp $BASE_NAME-*-merged.bam $START_DIR/
+    cd ..
+done
+
+
+
