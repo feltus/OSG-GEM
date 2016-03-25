@@ -1,0 +1,86 @@
+#!/usr/bin/python
+
+import stat
+import os
+import sys
+import time
+
+def main():
+
+    base_name = sys.argv[1]
+
+    max_seq_file = 20000
+    max_files_dir = 1000
+    out_dir = "."
+
+    count_seq = 0
+    count_seq_file = 0
+    count_files_dir = 0
+    outf = None
+    dir_id = 0
+    file_id = 0
+    outf_filename = ""
+
+    perf_start = time.time()
+
+    try:
+        os.makedirs("%s/%06d" %(out_dir, dir_id))
+    except:
+        pass
+    outf_filename = "%s/%06d/%s-%06d-%06d.fastq" \
+                    %(out_dir, dir_id, base_name, dir_id, file_id)
+    outf = open(outf_filename, "w", buffering=500*(1024**2))
+
+    line_count = 0
+    for line in sys.stdin:
+
+        line_count += 1
+            
+        # sanity check
+        if line_count == 1 and line[0] != '@':
+            print("Error: sequence number %d does not start with @" %(count_seq))
+            sys.exit(1)
+        
+        outf.write(line)
+    
+        if line_count == 4:
+            # we have a full sequence
+            count_seq += 1
+            count_seq_file += 1
+            line_count = 0
+
+            if count_seq_file == max_seq_file:
+                count_files_dir += 1
+                if count_files_dir == max_files_dir:
+                    dir_id += 1
+                    file_id = 0
+                    count_files_dir = 0
+                    try:
+                        os.makedirs("%s/%06d" %(out_dir, dir_id))
+                    except:
+                        pass
+                else:
+                    file_id += 1
+                count_seq_file = 0
+
+                outf.close()
+                outf_filename = "%s/%06d/%s-%06d-%06d.fastq" \
+                                %(out_dir, dir_id, base_name, dir_id, file_id)
+                outf = open(outf_filename, "w", buffering=500*(1024**2))
+  
+    outf.close()
+
+    # corner case where outf is empty at this point
+    if count_seq_file == 0:
+        try:
+            os.unlink(outf_filename)
+        except:
+            pass
+
+    delta = time.time() - perf_start
+    print("Total: %d sequences processed. %.0f sequences / s" %(count_seq, count_seq / delta))
+
+if __name__ == "__main__":
+    main()
+
+

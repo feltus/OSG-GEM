@@ -15,54 +15,82 @@ base_dir = os.getcwd()
 run_id = sys.argv[1]
 run_dir = sys.argv[2]    
 data_dir = sys.argv[3]
+forward_url = sys.argv[4]
+reverse_url = sys.argv[5]
 
-def main():
-    # Create a abstract dag
-    dax = AutoADAG("tophat")
+# are the URLs local?
+if forward_url[0] == "/":
+    forward_url = "file://" + forward_url
+if reverse_url[0] == "/":
+    reverse_url = "file://" + reverse_url
 
-    # email notificiations for when the state of the workflow changes
-    dax.invoke('all',  base_dir + "/email-notify")
-    
-    # Add executables to the DAX-level replica catalog
-    for exe_name in os.listdir("./tools/"):
-        exe = Executable(name=exe_name, arch="x86_64", installed=False)
-        exe.addPFN(PFN("file://" + base_dir + "/tools/" + exe_name, "local"))
-        dax.addExecutable(exe)
+base_name = re.sub(".*/", "", forward_url)
+base_name = re.sub("^(forward|reverse)_", "", base_name)
+base_name = re.sub("(_[12])*(\.fastq)*(\.gz)*$", "", base_name)
 
-    subdax_file = File("level-2.dax")
-    subdax_file.addPFN(PFN("file://%s/workflow/level-2.dax" % (run_dir), "local"))
-    dax.addFile(subdax_file) 
+print("Found input file: " + base_name)
 
-    # set up split job
-    j1 = Job(name="prepare-inputs")
-    j1.addArguments(base_dir, base_dir + "/inputs", data_dir)
-    j1.addProfile(Profile("hints", "execution.site", "local"))
-    dax.addJob(j1)
+# Create a abstract dag
+dax = AutoADAG("tophat")
 
-    # generate sub workflow
-    j2 = Job(name="dax-level-2")
-    j2.addArguments(run_id, base_dir, run_dir)
-    j2.addProfile(Profile("hints", "execution.site", "local"))
-    dax.addJob(j2)
-    dax.depends(parent=j1, child=j2)
+# email notificiations for when the state of the workflow changes
+dax.invoke('all',  base_dir + "/email-notify")
 
-    # sub workflow job
-    j3 = DAX("level-2.dax")
-    j3.addArguments("-Dpegasus.catalog.site.file=%s/sites.xml" % (base_dir),
-                    "--sites", "condorpool",
-                    "--staging-site", "stash",
-                    "--output-site", "local",
-                    "--basename", "level-2",
-                    "--force",
-                    "--cleanup", "none")
-    j3.uses(subdax_file, link=Link.INPUT)
-    dax.addDAX(j3)
-    dax.depends(parent=j2, child=j3)
-    
-    # Write the DAX to stdout
-    f = open("dax.xml", "w")
-    dax.writeXML(f)
-    f.close()
+# Add executables to the DAX-level replica catalog
+for exe_name in os.listdir("./tools/"):
+    exe = Executable(name=exe_name, arch="x86_64", installed=False)
+    exe.addPFN(PFN("file://" + base_dir + "/tools/" + exe_name, "local"))
+    dax.addExecutable(exe)
 
-main()
+subdax_file = File("level-2.dax")
+subdax_file.addPFN(PFN("file://%s/workflow/level-2.dax" % (run_dir), "local"))
+dax.addFile(subdax_file) 
+
+# set up split jobs
+print("Adding split job for forward file " + forward_url)
+forward_file = File("forward")
+forward_file.addPFN(PFN(forward_url, "local"))
+dax.addFile(forward_file)
+split1 = Job(name="prepare-inputs")
+split1.uses(forward_file, link=Link.INPUT)
+split1.addArguments(base_dir, forward_file, data_dir + "/" + base_name, "forward")
+split1.addProfile(Profile("hints", "execution.site", "local"))
+dax.addJob(split1)
+
+print("Adding split job for reverse file " + reverse_url)
+reverse_file = File("reverse")
+reverse_file.addPFN(PFN(reverse_url, "local"))
+dax.addFile(reverse_file)
+split2 = Job(name="prepare-inputs")
+split2.uses(reverse_file, link=Link.INPUT)
+split2.addArguments(base_dir, reverse_file , data_dir + "/" + base_name, "reverse")
+split2.addProfile(Profile("hints", "execution.site", "local"))
+dax.addJob(split2)
+
+# generate sub workflow
+j2 = Job(name="dax-level-2")
+j2.addArguments(run_id, base_dir, run_dir)
+j2.addProfile(Profile("hints", "execution.site", "local"))
+dax.addJob(j2)
+dax.depends(parent=split1, child=j2)
+dax.depends(parent=split2, child=j2)
+
+# sub workflow job
+j3 = DAX("level-2.dax")
+j3.addArguments("-Dpegasus.catalog.site.file=%s/sites.xml" % (base_dir),
+                "--sites", "condorpool",
+                "--staging-site", "stash",
+                "--output-site", "local",
+                "--basename", "level-2",
+                "--force",
+                "--cleanup", "none")
+j3.uses(subdax_file, link=Link.INPUT)
+dax.addDAX(j3)
+dax.depends(parent=j2, child=j3)
+
+# Write the DAX to stdout
+f = open("dax.xml", "w")
+dax.writeXML(f)
+f.close()
+
 

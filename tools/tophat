@@ -15,28 +15,33 @@ BASE_NAME=$3
 PART=$4
 COMMON_NAME=$5
 
+# make sure we have empty output files in case of errors
+touch $COMMON_NAME-out.txt
+touch $COMMON_NAME-accepted_hits.bam
+touch $COMMON_NAME-align_summary.txt
+
 java -Xmx512m \
      -jar trimmomatic-0.33.jar PE -threads 1 -phred33 \
-     forward-$COMMON_NAME.gz reverse-$COMMON_NAME.gz \
-     left_result.paired_trim.forward_$COMMON_NAME.fastq.gz left_result.unpaired_trim.forward_$COMMON_NAME.fastq.gz \
-     right_result.paired_trim.reverse_$COMMON_NAME.fastq.gz right_result.unpaired_trim.reverse_$COMMON_NAME.fastq.gz \
+     forward-$COMMON_NAME reverse-$COMMON_NAME \
+     left_result.paired_trim.forward_$COMMON_NAME.fastq left_result.unpaired_trim.forward_$COMMON_NAME.fastq \
+     right_result.paired_trim.reverse_$COMMON_NAME.fastq right_result.unpaired_trim.reverse_$COMMON_NAME.fastq \
      ILLUMINACLIP:fasta_adapter.txt:2:40:15 LEADING:3 TRAILING:6 SLIDINGWINDOW:4:15 MINLEN:50
 
 # empty outputs?
-LEFT_SIZE=`du -sb left_result.paired_trim.forward_$COMMON_NAME.fastq.gz | cut -f 1`
-RIGHT_SIZE=`du -sb right_result.paired_trim.reverse_$COMMON_NAME.fastq.gz | cut -f 1`
+LEFT_SIZE=`du -sb left_result.paired_trim.forward_$COMMON_NAME.fastq | cut -f 1`
+RIGHT_SIZE=`du -sb right_result.paired_trim.reverse_$COMMON_NAME.fastq | cut -f 1`
 if [ $LEFT_SIZE -lt 50 -o $RIGHT_SIZE -lt 50 ]; then
     echo "Warning: trimmomatic output was 0 sequences"
     touch $COMMON_NAME-accepted_hits.bam
     exit 0
 fi
 
-
 mkdir work-$$
 
 tophat2 --no-coverage-search -o work-$$ ./Medtr \
-        left_result.paired_trim.forward_$COMMON_NAME.fastq.gz \
-        right_result.paired_trim.reverse_$COMMON_NAME.fastq.gz
+        left_result.paired_trim.forward_$COMMON_NAME.fastq \
+        right_result.paired_trim.reverse_$COMMON_NAME.fastq \
+        | tee $COMMON_NAME-out.txt
 
 echo
 find work-$$
@@ -44,5 +49,6 @@ echo
 
 # we only need the accepted hits, but it needs a unique name
 cp work-$$/accepted_hits.bam $COMMON_NAME-accepted_hits.bam
+cp work-$$/align_summary.txt $COMMON_NAME-align_summary.txt
 
 

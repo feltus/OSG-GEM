@@ -51,12 +51,16 @@ def tophat(dax, base_name, part, common_part, forward_file, reverse_file):
     add_task_files(dax, j, "tophat")
     j.uses(forward_file, link=Link.INPUT)
     j.uses(reverse_file, link=Link.INPUT)
-    # output file
-    f = File(common_part + "-accepted_hits.bam")
-    j.uses(f, link=Link.OUTPUT, transfer=False)
+    # output files
+    f1 = File(common_part + "-accepted_hits.bam")
+    j.uses(f1, link=Link.OUTPUT, transfer=False)
+    f2 = File(common_part + "-align_summary.txt")
+    j.uses(f2, link=Link.OUTPUT, transfer=True)
+    f3 = File(common_part + "-out.txt")
+    j.uses(f3, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
 
-    return f
+    return f1
 
 
 def merge(dax, base_name, in_list):
@@ -103,6 +107,8 @@ def generate_sub_wf(base_name, part):
     for exe_name in os.listdir(base_dir + "/tools/"):
         exe = Executable(name=exe_name, arch="x86_64", installed=False)
         exe.addPFN(PFN("file://" + base_dir + "/tools/" + exe_name, "local"))
+        if exe_name == "tophat":
+            exe.addProfile(Profile(Namespace.PEGASUS, "clusters.size", 5))
         dax.addExecutable(exe)
 
     my_data_dir = run_dir + "/data/" + base_name + "/" + part
@@ -114,16 +120,21 @@ def generate_sub_wf(base_name, part):
         if not "forward" in in_name:
             continue
 
+        # use stash urls for the data so we can bypass and grab it directly from
+        # the jobs
+        base_url = "http://stash.osgconnect.net/~" + getpass.getuser() + "/" + run_id + \
+                   "/data/" + base_name + "/" + part
+
         common_part = in_name
         common_part = re.sub("forward\-", "", common_part)
         common_part = re.sub("\.gz", "", common_part)
         
-        for_file = File("forward-" + common_part + ".gz")
-        for_file.addPFN(PFN("file://" + my_data_dir + "/forward-" + common_part + ".gz", "local"))
+        for_file = File("forward-" + common_part)
+        for_file.addPFN(PFN(base_url + "/forward-" + common_part, "stash"))
         dax.addFile(for_file)
         
-        rev_file = File("reverse-" + common_part + ".gz")
-        rev_file.addPFN(PFN("file://" + my_data_dir + "/reverse-" + common_part + ".gz", "local"))
+        rev_file = File("reverse-" + common_part)
+        rev_file.addPFN(PFN(base_url + "/reverse-" + common_part, "stash"))
         dax.addFile(rev_file)
     
         out_file = tophat(dax, base_name, part, common_part, for_file, rev_file)
@@ -151,13 +162,16 @@ def main():
         exe.addPFN(PFN("file://" + base_dir + "/tools/" + exe_name, "local"))
         dax.addExecutable(exe)
 
+    # has to be the one under public/
+    data_dir = "/stash2/user/" + getpass.getuser() + "/public/" + run_id + "/data"
+
     # we need a bunch of workflows, and one merge/cuff for each base input
-    for base_name in os.listdir(run_dir +  "/data"):
+    for base_name in os.listdir(data_dir):
 
         parents = []
         parts = []
         
-        for part in os.listdir(run_dir + "/data/" + base_name):
+        for part in os.listdir(data_dir + "/" + base_name):
 
             print(base_name, part)
 
@@ -173,6 +187,7 @@ def main():
                            "--staging-site", "stash",
                            "--output-site", "local",
                            "--basename", "%s-%s" %(base_name, part),
+                           "--cluster", "horizontal",
                            "--force",
                            "--cleanup", "none")
             j.uses(subdax_file, link=Link.INPUT)

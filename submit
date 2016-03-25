@@ -4,22 +4,17 @@ set -e
 
 TOPDIR=`pwd`
 
-module load pegasus/4.6.0cvs
-
 RUN_ID=tophat-`date +'%s'`
 
-RUN_DIR=/home/$USER/workflows/$RUN_ID
-mkdir -p $RUN_DIR
-# but offload data to stash
-for ENTRY in data scratch; do
-    mkdir -p /stash2/user/$USER/public/$RUN_ID/$ENTRY
-    ln -s /stash2/user/$USER/public/$RUN_ID/$ENTRY $RUN_DIR/$ENTRY
-done
+RUN_DIR=/stash2/user/$USER/workflows/$RUN_ID
 mkdir -p $RUN_DIR/scratch/$RUN_ID/level-2
+# make the data availabile over http
+mkdir -p /stash2/user/$USER/public/$RUN_ID/data
+ln -s /stash2/user/$USER/public/$RUN_ID/data $RUN_DIR/data
 
 # generate the dax
 export PYTHONPATH=`pegasus-config --python`
-./tools/dax-level-1 $RUN_ID $RUN_DIR $RUN_DIR/data
+./tools/dax-level-1 $RUN_ID $RUN_DIR $RUN_DIR/data $1 $2
 
 # create the site catalog
 cat >sites.xml <<EOF
@@ -34,12 +29,15 @@ cat >sites.xml <<EOF
             <file-server operation="all" url="file://$RUN_DIR/outputs"/>
         </directory>
         <profile namespace="pegasus" key="SSH_PRIVATE_KEY" >/home/$USER/.ssh/workflow</profile>
-        <profile namespace="env" key="PATH" >$PATH</profile>
+        <profile namespace="env" key="PATH" >/cvmfs/oasis.opensciencegrid.org/osg/modules/stashcp/2.6/bin:/cvmfs/oasis.opensciencegrid.org/osg/modules/xrootd/4.2.1/bin:$PATH</profile> 
+        <profile namespace="env" key="LD_LIBRARY_PATH" >/cvmfs/oasis.opensciencegrid.org/osg/modules/xrootd/4.2.1/lib64</profile>
+        <profile namespace="condor" key="+WantsStashCache" >True</profile>
     </site>
 
     <site  handle="stash" arch="x86_64" os="LINUX">
         <directory type="shared-scratch" path="/stash2/user/$USER/public">
-            <file-server operation="get" url="http://stash.ci-connect.net/~$USER"/>
+            <file-server operation="get" url="http://stash.osgconnect.net/~$USER"/>
+            <!-- file-server operation="get" url="stash:///user/$USER/public"/ -->
             <file-server operation="put" url="scp://$USER@login02.osgconnect.net/stash2/user/$USER/public"/>
         </directory>
     </site>
@@ -48,8 +46,9 @@ cat >sites.xml <<EOF
         <profile namespace="pegasus" key="style" >condor</profile>
         <profile namespace="condor" key="universe" >vanilla</profile>
         <profile namespace="condor" key="requirements" >OSGVO_OS_STRING == "RHEL 6" &amp;&amp; HAS_MODULES == True &amp;&amp; GLIDEIN_ResourceName != "Hyak" &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName1 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName2 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName3 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName4</profile>
-        <profile namespace="condor" key="request_memory" >5 GB</profile>
-        <profile namespace="condor" key="request_disk" >10 GB</profile>
+        <profile namespace="condor" key="request_memory" >3 GB</profile>
+        <profile namespace="condor" key="request_disk" >5 GB</profile>
+        <profile namespace="condor" key="+WantsStashCache" >True</profile>
     </site>
 
 </sitecatalog>

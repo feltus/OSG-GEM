@@ -5,66 +5,29 @@
 set -e
 
 TOOLS_DIR=$1
-INPUT_DIR=$2
+INPUT_FILE=$(readlink -f $2)
 TARGET_DIR=$3
+TEMPLATE_NAME=$4
+    
+#BASE_NAME=`basename $INPUT_FILE | sed -E 's/^(forward_|reverse_)//' | sed -E 's/(_[12])*(.fastq)*(.gz)*$//g'`
 
+echo "Outputting to $TARGET_DIR"
 mkdir -p $TARGET_DIR
 
-for FORWARD_FILE in `(cd $INPUT_DIR && ls *.gz | grep forward_)`; do
+CMD="cat $INPUT_FILE"
 
-    echo $FORWARD_FILE
+# is it a gzip file?
+if (file $INPUT_FILE | grep gzip) >/dev/null 2>&1; then
+    CMD="$CMD | pigz -d -"
+fi
 
-    BASE_NAME=`echo $FORWARD_FILE | sed 's/^forward_//' | sed 's/.fastq.gz//'`
-    REVERSE_FILE="reverse_$BASE_NAME.fastq.gz"
+# split
+CMD="$CMD | $TOOLS_DIR/task-files/prepare-inputs/fastq-split-pipe $TEMPLATE_NAME"
 
-    echo "Found $BASE_NAME"
-
-    mkdir -p $TARGET_DIR/$BASE_NAME
-
-    # copy and gunzip
-    cat $INPUT_DIR/$FORWARD_FILE | gunzip - >$TARGET_DIR/$BASE_NAME/forward &
-    cat $INPUT_DIR/$REVERSE_FILE | gunzip - >$TARGET_DIR/$BASE_NAME/reverse &
-    wait
-
-    # first split
-    cd $TARGET_DIR/$BASE_NAME
-    #$TOOLS_DIR/task-files/split-fastq/fastq-splitter.pl --measure count \
-    #    --part-size 1000000 forward &
-    #$TOOLS_DIR/task-files/split-fastq/fastq-splitter.pl --measure count \
-    #    --part-size 1000000 reverse &
-    $TOOLS_DIR/task-files/split-fastq/split 2000000 forward &
-    $TOOLS_DIR/task-files/split-fastq/split 2000000 reverse &
-    wait
-    rm forward
-    rm reverse
-
-    # second level
-    for F in `ls forward-*`; do
-        PART=`echo $F | sed 's/forward\-//'`
-        mkdir $PART
-        mv forward-$PART reverse-$PART $PART/
-        cd $PART
-        #$TOOLS_DIR/task-files/split-fastq/fastq-splitter.pl --measure count \
-        #    --part-size 3000 forward.$PART &
-        #$TOOLS_DIR/task-files/split-fastq/fastq-splitter.pl --measure count \
-        #    --part-size 3000 reverse.$PART &
-        $TOOLS_DIR/task-files/split-fastq/split 10000 forward-$PART &
-        $TOOLS_DIR/task-files/split-fastq/split 10000 reverse-$PART &
-        wait
-        rm forward-$PART
-        rm reverse-$PART
-
-        # gzip the results
-        for F in `ls`; do
-            gzip $F 
-        done
-
-        cd ..
-    done
-
-done
+cd $TARGET_DIR
+echo "Executing: $CMD"
+eval "$CMD"
 
 exit 0
-
 
 

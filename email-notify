@@ -21,24 +21,6 @@ echo >>$TMPFILE
 
 EXTRA_ARGS=""
 
-## workflow images in the start message (only for small workflows
-JOBS=`ls *.sub | wc -l`
-if [ $JOBS -lt 500 ]; then
-    if [ ! -e dax.png ]; then
-        pegasus-graphviz -o dag.dot *.dag
-        dot -Tpng -odag.png dag.dot
-        if [ -e dag.png ]; then
-            EXTRA_ARGS="$EXTRA_ARGS -a dag.png"
-        fi
-    
-        pegasus-graphviz -o dax.dot dax.xml
-        dot -Tpng -odax.png dax.dot
-        if [ -e dax.png ]; then
-            EXTRA_ARGS="$EXTRA_ARGS -a dax.png"
-        fi
-    fi
-fi
-
 # grab the email from .forward for now
 if [ -e ~/.forward ]; then
     for DEST in `cat ~/.forward | grep "@"`; do
