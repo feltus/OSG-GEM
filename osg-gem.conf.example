@@ -1,0 +1,35 @@
+
+[reference]
+
+reference_prefix = Medtr
+annotation = http://stash.osgconnect.net/stash2/user/wpoehlm/GEM_workflow/OSG-GEM_3_25_commit_4/task-files/cuff/Mt4.0v1_genes_20130731_1800.gff3
+
+[inputs]
+
+# if the files exist and are available, specify the file path or urls here
+forward = /home/wpoehlm/Test_SPLIT/SRR950098_1.fastq.gz
+reverse = /home/wpoehlm/Test_SPLIT/SRR950098_2.fastq.gz
+
+# alternativly, you can specify a SRA ID and the workflow will pull down
+# the data directly. Note: either forward/reverse or sra_id has to be
+# specified, but not both at the same time.
+#sra_id = SRR390728
+
+[config]
+
+# process using TopHat2
+tophat2 = False
+
+# process using Hisat2
+hisat2 = True
+
+# process using Cufflinks
+
+cufflinks = True
+
+# process using StringTie
+
+stringtie = False
+
+
+

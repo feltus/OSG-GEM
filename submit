@@ -14,7 +14,7 @@ ln -s /stash2/user/$USER/public/$RUN_ID/data $RUN_DIR/data
 
 # generate the dax
 export PYTHONPATH=`pegasus-config --python`
-./tools/dax-level-1 $RUN_ID $RUN_DIR $RUN_DIR/data $1 $2
+./tools/dax-level-1 $RUN_ID $RUN_DIR $RUN_DIR/data
 
 # create the site catalog
 cat >sites.xml <<EOF

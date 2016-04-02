@@ -1,4 +1,9 @@
 dax.xml
 sites.xml
-task-files/tophat/Medtr*
+task-files/tophat/*.fa
+task-files/tophat/*.ht2
+task-files/hisat2/*.fa
+task-files/hisat2/*.ht2
 tools/AutoADAG.pyc
+osg-gem.conf
+
