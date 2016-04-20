@@ -9,7 +9,7 @@ module load java/8u25
 COUNT=`ls *.bam | wc -l`
 if [ $COUNT = 1 ]; then
     cp *.bam $1-merged.sam
-    samtools view -Su $1-merged.sam | samtools sort - $1-merged.sorted
+    samtools view -Su $1-merged.sam | samtools sort - $1-merged.sorted.bam
     cp $1-merged.sorted.bam $1-merged.bam
     exit 0
 fi
@@ -23,7 +23,7 @@ for F in `ls *.bam`; do
 done
 
 echo
-echo
+echo "Files left after 'empty' prune:"
 ls -l
 echo
 echo
@@ -31,13 +31,13 @@ echo
 # no input files left
 COUNT=`ls *.bam 2>/dev/null | wc -l`
 if [ $COUNT = 0 ]; then
-    touch $1-merged.sam
+    touch $1-merged.bam
     exit 0
 fi
 
 samtools merge $1-merged.sam *.bam
 
-samtools view -Su $1-merged.sam | samtools sort - $1-merged.sorted
+samtools view -Su $1-merged.sam | samtools sort - $1-merged.sorted.bam
 
 mv $1-merged.sorted.bam $1-merged.bam
 
