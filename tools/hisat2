@@ -38,7 +38,14 @@ tar -xf hisat2-2.0.0-beta.tar.gz
 
 hisat2-2.0.0-beta/hisat2 -x ./Medtr -q -1 ./left_result.paired_trim.forward_$COMMON_NAME.fastq -2 ./right_result.paired_trim.reverse_$COMMON_NAME.fastq -S test.accepted_hits.sam -t --dta-cufflinks > $COMMON_NAME-out.txt
 
+
+
 # we only need the accepted hits, but it needs a unique name
 cp test.accepted_hits.sam $COMMON_NAME-accepted_hits.sam
 
+# Convert to sorted bam file
+
+samtools view -Su $COMMON_NAME-accepted_hits.sam | samtools sort - $COMMON_NAME-accepted_hits.sorted
+
+mv $COMMON_NAME-accepted_hits.sorted.bam $COMMON_NAME-accepted_hits.bam
 

@@ -8,14 +8,12 @@ module load java/8u25
 # 1 input file is possible, but samtools can't handle that
 COUNT=`ls *.bam | wc -l`
 if [ $COUNT = 1 ]; then
-    cp *.bam $1-merged.sam
-    samtools view -Su $1-merged.sam | samtools sort - $1-merged.sorted.bam
-    cp $1-merged.sorted.bam $1-merged.bam
+    cp *.bam $1-merged.bam
     exit 0
 fi
 
 # remove "empty" inputs
-for F in `ls *.bam`; do
+for F in `ls *bam`; do
         SIZE=`du -sb $F | cut -f 1`
         if [ $SIZE -lt 50 ]; then
                 rm $F
@@ -23,7 +21,7 @@ for F in `ls *.bam`; do
 done
 
 echo
-echo "Files left after 'empty' prune:"
+echo
 ls -l
 echo
 echo
@@ -35,9 +33,5 @@ if [ $COUNT = 0 ]; then
     exit 0
 fi
 
-samtools merge $1-merged.sam *.bam
-
-samtools view -Su $1-merged.sam | samtools sort - $1-merged.sorted.bam
-
-mv $1-merged.sorted.bam $1-merged.bam
+samtools merge $1-merged.bam *.bam
 
