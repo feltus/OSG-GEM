@@ -3,16 +3,18 @@
 set -e
 
 module load samtools/0.1.17
-module load bowtie/2.2.3
+module load bowtie/2.2.9
+module load hisat2/2.0.3-beta
 module load java/8u25
 
 set -v
 
 CONNECT_USER=$1
 RUN_ID=$2
-BASE_NAME=$3
-PART=$4
-COMMON_NAME=$5
+REF_PREFIX=$3
+BASE_NAME=$4
+PART=$5
+COMMON_NAME=$6
 
 # make sure we have empty output files in case of errors
 touch $COMMON_NAME-out.txt
@@ -34,11 +36,7 @@ if [ $LEFT_SIZE -lt 50 -o $RIGHT_SIZE -lt 50 ]; then
     exit 0
 fi
 
-tar -xf hisat2-2.0.0-beta.tar.gz
-
-hisat2-2.0.0-beta/hisat2 -x ./Medtr -q -1 ./left_result.paired_trim.forward_$COMMON_NAME.fastq -2 ./right_result.paired_trim.reverse_$COMMON_NAME.fastq -S test.accepted_hits.sam -t --dta-cufflinks > $COMMON_NAME-out.txt
-
-
+hisat2 -x ./$REF_PREFIX -q -1 ./left_result.paired_trim.forward_$COMMON_NAME.fastq -2 ./right_result.paired_trim.reverse_$COMMON_NAME.fastq -S test.accepted_hits.sam -t --dta-cufflinks > $COMMON_NAME-out.txt
 
 # we only need the accepted hits, but it needs a unique name
 cp test.accepted_hits.sam $COMMON_NAME-accepted_hits.sam

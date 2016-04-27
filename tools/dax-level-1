@@ -25,6 +25,18 @@ if len(r) != 1:
     print("ERROR: Unable to read osg-gem.conf!")
     sys.exit(1)
 
+# making sure the user specified a reference set
+print("\nAdding reference files ...")
+count = 0
+for fname in os.listdir(base_dir + "/reference/"):
+    if re.search("^" + conf.get("reference", "reference_prefix"), fname):
+        print("    " + fname)
+        count += 1
+if count == 0:
+    print("ERROR: Unable to find reference files in the reference/ directory" +
+          " with the specified prefix: " + conf.get("reference", "reference_prefix"))
+    sys.exit(1)
+
 # TODO: add support for SRA IDs
 forward_url = conf.get("inputs", "forward")
 reverse_url = conf.get("inputs", "reverse")
@@ -39,7 +51,7 @@ base_name = re.sub(".*/", "", forward_url)
 base_name = re.sub("^(forward|reverse)_", "", base_name)
 base_name = re.sub("(_[12])*(\.fastq)*(\.gz)*$", "", base_name)
 
-print("Found input file: " + base_name)
+print("\nFound input file: " + base_name)
 
 # Create a abstract dag
 dax = AutoADAG("gem")
@@ -58,7 +70,7 @@ subdax_file.addPFN(PFN("file://%s/workflow/level-2.dax" % (run_dir), "local"))
 dax.addFile(subdax_file) 
 
 # set up split jobs
-print("Adding split job for forward file " + forward_url)
+print("\nAdding split job for forward file " + forward_url)
 forward_file = File("forward")
 forward_file.addPFN(PFN(forward_url, "local"))
 dax.addFile(forward_file)

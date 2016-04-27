@@ -4,6 +4,9 @@ task-files/tophat/*.fa
 task-files/tophat/*.ht2
 task-files/hisat2/*.fa
 task-files/hisat2/*.ht2
+reference/*.fa
+reference/*.bt2
+reference/*.ht2
 tools/AutoADAG.pyc
 osg-gem.conf
 

@@ -2,18 +2,19 @@
 
 set -e
 
-module load tophat/2.0.13
+module load tophat/2.1.1
 module load samtools/0.1.17
-module load bowtie/2.2.3
+module load bowtie/2.2.9
 module load java/8u25
 
 set -v
 
 CONNECT_USER=$1
 RUN_ID=$2
-BASE_NAME=$3
-PART=$4
-COMMON_NAME=$5
+REF_PREFIX=$3
+BASE_NAME=$4
+PART=$5
+COMMON_NAME=$6
 
 # make sure we have empty output files in case of errors
 touch $COMMON_NAME-out.txt
@@ -38,7 +39,7 @@ fi
 
 mkdir work-$$
 
-tophat2 --no-coverage-search -o work-$$ ./Medtr \
+tophat2 --no-coverage-search -o work-$$ ./$REF_PREFIX \
         left_result.paired_trim.forward_$COMMON_NAME.fastq \
         right_result.paired_trim.reverse_$COMMON_NAME.fastq \
         | tee $COMMON_NAME-out.txt

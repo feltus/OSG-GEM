@@ -8,11 +8,11 @@ cd $PEGASUS_SUBMIT_DIR
 TMPFILE=`mktemp -t pegasus-notification.XXXXXXXXXX` || exit 1
 
 cat >>$TMPFILE <<EOF
-The workflow in:
+The following workflow issued an event: $PEGASUS_EVENT
 
   $PEGASUS_SUBMIT_DIR
 
-Below is output from pegasus-status.
+Below is output from pegasus-status:
 
 EOF
 

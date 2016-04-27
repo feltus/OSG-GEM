@@ -22,6 +22,7 @@ from Pegasus.DAX3 import *
 
 # globals
 task_files = {}
+ref_files = {}
 
 # read the config file
 conf = ConfigParser.SafeConfigParser()
@@ -49,12 +50,39 @@ def add_task_files(dax, job, task_name):
         job.uses(f, link=Link.INPUT)
 
 
+def add_ref_files(dax, job, ref_prefix):
+    """
+    add a set of reference input files
+    """
+    global ref_files
+    if ref_prefix not in ref_files:
+        ref_files[ref_prefix] = {}
+    # add to DAX-level replica catalog
+    for fname in os.listdir(base_dir + "/reference/"):
+        if not re.search("^" + ref_prefix, fname):
+            # skip non-matching files
+            continue
+        if fname not in ref_files[ref_prefix]:
+            ref_files[ref_prefix][fname] = File(fname)
+            ref_files[ref_prefix][fname].addPFN( \
+                PFN("file://" + base_dir + "/reference/" + fname, "local"))
+            dax.addFile(ref_files[ref_prefix][fname])
+    for f in ref_files[ref_prefix]:
+        job.uses(f, link=Link.INPUT)
+
+
 def hisat2(dax, base_name, part, common_part, forward_file, reverse_file):
 
     # Add job
     j = Job(name="hisat2")
-    j.addArguments(getpass.getuser(), run_id, base_name, part, common_part)
+    j.addArguments(getpass.getuser(), \
+                   run_id, \
+                   conf.get("reference", "reference_prefix"), \
+                   base_name, \
+                   part, \
+                   common_part)
     add_task_files(dax, j, "hisat2")
+    add_ref_files(dax, j, conf.get("reference", "reference_prefix"))
     j.uses(forward_file, link=Link.INPUT)
     j.uses(reverse_file, link=Link.INPUT)
     # output files
@@ -73,8 +101,14 @@ def tophat(dax, base_name, part, common_part, forward_file, reverse_file):
 
     # Add job
     j = Job(name="tophat")
-    j.addArguments(getpass.getuser(), run_id, base_name, part, common_part)
+    j.addArguments(getpass.getuser(), \
+                   run_id, \
+                   conf.get("reference", "reference_prefix"), \
+                   base_name, \
+                   part, \
+                   common_part)
     add_task_files(dax, j, "tophat")
+    add_ref_files(dax, j, conf.get("reference", "reference_prefix"))
     j.uses(forward_file, link=Link.INPUT)
     j.uses(reverse_file, link=Link.INPUT)
     # output files
@@ -123,8 +157,10 @@ def cuff(dax, base_name, merged):
 
 def generate_sub_wf(base_name, part):
     global task_files
+    global ref_files
 
     task_files = {}
+    ref_files = {}
     
     # Create a abstract dag
     dax = AutoADAG("%s-%s" %(base_name, part))
