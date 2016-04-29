@@ -13,7 +13,4 @@ cufflinks -o $BASE_NAME.cuff -G Mt4.0v1_genes_20130731_1800.gff3 *.bam
 
 cp $BASE_NAME.cuff/transcripts.gtf .
 
-cuffcompare -o sample_counts -r Mt4.0v1_genes_20130731_1800.gff3 *.gtf
-
-perl perl_cufflinks_parse.txt sample_counts.tracking > $BASE_NAME-merged_counts.fpkm
-
+python GTF_parse.py transcripts.gtf > $BASE_NAME-merged_counts.fpkm
