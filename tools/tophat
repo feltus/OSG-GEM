@@ -29,8 +29,8 @@ java -Xmx512m \
      ILLUMINACLIP:fasta_adapter.txt:2:40:15 LEADING:3 TRAILING:6 SLIDINGWINDOW:4:15 MINLEN:50
 
 # empty outputs?
-LEFT_SIZE=`du -sb left_result.paired_trim.forward_$COMMON_NAME.fastq | cut -f 1`
-RIGHT_SIZE=`du -sb right_result.paired_trim.reverse_$COMMON_NAME.fastq | cut -f 1`
+LEFT_SIZE=`ls -l left_result.paired_trim.forward_$COMMON_NAME.fastq | cut -d ' ' -f 5`
+RIGHT_SIZE=`ls -l right_result.paired_trim.reverse_$COMMON_NAME.fastq | cut -d ' ' -f 5`
 if [ $LEFT_SIZE -lt 50 -o $RIGHT_SIZE -lt 50 ]; then
     echo "Warning: trimmomatic output was 0 sequences"
     touch $COMMON_NAME-accepted_hits.bam
