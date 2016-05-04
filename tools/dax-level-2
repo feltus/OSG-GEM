@@ -155,6 +155,20 @@ def cuff(dax, base_name, merged):
     return f
 
 
+def stringtie(dax, base_name, merged):
+
+    # Add job
+    j = Job(name="StringTie")
+    j.addArguments(base_name)
+    add_task_files(dax, j, "StringTie")
+    j.uses(merged, link=Link.INPUT)
+    f = File(base_name + "-merged_counts.fpkm")
+    j.uses(f, link=Link.OUTPUT, transfer=True)
+    dax.addJob(j)
+
+    return f
+
+
 def generate_sub_wf(base_name, part):
     global task_files
     global ref_files
@@ -275,8 +289,12 @@ def main():
         # merge
         merged = merge(dax, base_name, accepted_hits)
 
-        # cuff
-        cuff(dax, base_name, merged)
+        if conf.getboolean("config", "cufflinks"):
+            # cuff
+            counts_file = cuff(dax, base_name, merged)
+        else:
+            # StringTie
+            stringtie(dax, base_name, merged)
     
     # Write the DAX
     f = open(run_dir + "/workflow/level-2.dax", "w")
