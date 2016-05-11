@@ -9,7 +9,7 @@ set -v
 
 BASE_NAME=$1
 
-stringtie *.bam -G Mt4.0v1_genes_20130731_1800.gff3 -e -B -o out.gtf
+stringtie *.bam -G chr21-gencode.v24.annotation.gff3 -e -B -o out.gtf
 
 python ST_ttab_parse.py t_data.ctab > $BASE_NAME-merged_counts.fpkm
 

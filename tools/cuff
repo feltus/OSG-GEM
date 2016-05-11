@@ -9,7 +9,7 @@ set -v
 
 BASE_NAME=$1
 
-cufflinks -o $BASE_NAME.cuff -G Mt4.0v1_genes_20130731_1800.gff3 *.bam
+cufflinks -o $BASE_NAME.cuff -G chr21-gencode.v24.annotation.gff3 *.bam
 
 cp $BASE_NAME.cuff/transcripts.gtf .
 

@@ -1,31 +1,14 @@
 
 [reference]
 
-reference_prefix = Medtr
-annotation = http://stash.osgconnect.net/stash2/user/wpoehlm/GEM_workflow/OSG-GEM_3_25_commit_4/task-files/cuff/Mt4.0v1_genes_20130731_1800.gff3
+reference_prefix = chr21-GRCh38
 
 [inputs]
 
 # if the files exist and are available, specify the file path or urls here
-#forward = /home/wpoehlm/Test_SPLIT/SRR950098_1.fastq.gz
-#reverse = /home/wpoehlm/Test_SPLIT/SRR950098_2.fastq.gz
 
-#forward = /home/wpoehlm/Test_SPLIT/test_1.fastq.gz
-#reverse = /home/wpoehlm/Test_SPLIT/test_2.fastq.gz
-
-
-#forward = /home/wpoehlm/Test_SPLIT/TEST_1.fastq.gz
-
-#reverse = /home/wpoehlm/Test_SPLIT/TEST_2.fastq.gz
-
-forward = /home/wpoehlm/Test_SPLIT/SRR949256_1.fastq.gz
-reverse = /home/wpoehlm/Test_SPLIT/SRR949256_2.fastq.gz
-
-
-# alternativly, you can specify a SRA ID and the workflow will pull down
-# the data directly. Note: either forward/reverse or sra_id has to be
-# specified, but not both at the same time.
-#sra_id = SRR390728
+forward = /stash2/user/wpoehlm/OSG_GEM_Experiments/Test_Data/Test_data/TEST_1.fastq.gz
+reverse = /stash2/user/wpoehlm/OSG_GEM_Experiments/Test_Data/Test_data/TEST_2.fastq.gz
 
 [config]
 
@@ -37,9 +20,9 @@ hisat2 = True
 
 # process using Cufflinks
 
-cufflinks = True
+cufflinks = False
 
 # process using StringTie
 
-stringtie = False
+stringtie = True
 
