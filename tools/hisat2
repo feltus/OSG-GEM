@@ -8,6 +8,7 @@ module load hisat2/2.0.3-beta
 module load java/8u25
 
 set -v
+set -o pipefail
 
 CONNECT_USER=$1
 RUN_ID=$2
@@ -25,7 +26,8 @@ java -Xmx512m \
      forward-$COMMON_NAME reverse-$COMMON_NAME \
      left_result.paired_trim.forward_$COMMON_NAME.fastq left_result.unpaired_trim.forward_$COMMON_NAME.fastq \
      right_result.paired_trim.reverse_$COMMON_NAME.fastq right_result.unpaired_trim.reverse_$COMMON_NAME.fastq \
-     ILLUMINACLIP:fasta_adapter.txt:2:40:15 LEADING:3 TRAILING:6 SLIDINGWINDOW:4:15 MINLEN:50
+     ILLUMINACLIP:fasta_adapter.txt:2:40:15 LEADING:3 TRAILING:6 SLIDINGWINDOW:4:15 MINLEN:50 \
+     2>&1 | tee $COMMON_NAME-trimmomatic.txt
 
 # empty outputs?
 LEFT_SIZE=`ls -l left_result.paired_trim.forward_$COMMON_NAME.fastq | cut -d ' ' -f 5`

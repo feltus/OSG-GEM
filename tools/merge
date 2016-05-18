@@ -8,7 +8,8 @@ module load java/8u25
 # 1 input file is possible, but samtools can't handle that
 COUNT=`ls *.bam | wc -l`
 if [ $COUNT = 1 ]; then
-    cp *.bam $1-merged.bam
+    echo "Only 1 input give. Ouput will be a copy of that one input"
+    mv *.bam $1-merged.bam
     exit 0
 fi
 
@@ -16,6 +17,7 @@ fi
 for F in `ls *bam`; do
         SIZE=`du -sb $F | cut -f 1`
         if [ $SIZE -lt 50 ]; then
+                echo "Removing $F due to it being empty"
                 rm $F
         fi
 done
@@ -29,6 +31,7 @@ echo
 # no input files left
 COUNT=`ls *.bam 2>/dev/null | wc -l`
 if [ $COUNT = 0 ]; then
+    echo "No bam files left - creating a new one"
     touch $1-merged.bam
     exit 0
 fi

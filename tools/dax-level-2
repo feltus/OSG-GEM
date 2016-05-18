@@ -23,6 +23,7 @@ from Pegasus.DAX3 import *
 # globals
 task_files = {}
 ref_files = {}
+gff3_files = {}
 
 # read the config file
 conf = ConfigParser.SafeConfigParser()
@@ -59,7 +60,7 @@ def add_ref_files(dax, job, ref_prefix):
         ref_files[ref_prefix] = {}
     # add to DAX-level replica catalog
     for fname in os.listdir(base_dir + "/reference/"):
-        if not re.search("^" + ref_prefix, fname):
+        if (not re.search("^" + ref_prefix, fname)) or (re.search("\.gff3$", fname)):
             # skip non-matching files
             continue
         if fname not in ref_files[ref_prefix]:
@@ -69,6 +70,30 @@ def add_ref_files(dax, job, ref_prefix):
             dax.addFile(ref_files[ref_prefix][fname])
     for f in ref_files[ref_prefix]:
         job.uses(f, link=Link.INPUT)
+
+
+def add_gff3_file(dax, job):
+    """
+    adds a gff3 to a job
+    """
+    global gff3_files
+    rf = None
+    # add to DAX-level replica catalog
+    for fname in os.listdir(base_dir + "/reference/"):
+        if not re.search("\.gff3$", fname):
+            # skip non-matching files
+            continue
+        if fname not in gff3_files:
+            gff3_files[fname] = File(fname)
+            gff3_files[fname].addPFN( \
+                PFN("file://" + base_dir + "/reference/" + fname, "local"))
+            dax.addFile(gff3_files[fname])
+    for f in gff3_files:
+        job.uses(f, link=Link.INPUT)
+        # should only be one
+        rf = f
+    return rf
+
 
 
 def hisat2(dax, base_name, part, common_part, forward_file, reverse_file):
@@ -92,6 +117,8 @@ def hisat2(dax, base_name, part, common_part, forward_file, reverse_file):
     #j.uses(f2, link=Link.OUTPUT, transfer=True)
     f3 = File(common_part + "-out.txt")
     j.uses(f3, link=Link.OUTPUT, transfer=True)
+    f4 = File(common_part + "-trimmomatic.txt")
+    j.uses(f4, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
 
     return f1
@@ -118,6 +145,8 @@ def tophat(dax, base_name, part, common_part, forward_file, reverse_file):
     j.uses(f2, link=Link.OUTPUT, transfer=True)
     f3 = File(common_part + "-out.txt")
     j.uses(f3, link=Link.OUTPUT, transfer=True)
+    f4 = File(common_part + "-trimmomatic.txt")
+    j.uses(f4, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
 
     return f1
@@ -146,8 +175,14 @@ def cuff(dax, base_name, merged):
     # Add job
     j = Job(name="cuff")
     j.addArguments(base_name)
+
+    # inputs
     add_task_files(dax, j, "cuff")
+    gff3 = add_gff3_file(dax, j)
+    j.addArguments(gff3)
     j.uses(merged, link=Link.INPUT)
+
+    # outputs
     f = File(base_name + "-merged_counts.fpkm")
     j.uses(f, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
@@ -160,8 +195,14 @@ def stringtie(dax, base_name, merged):
     # Add job
     j = Job(name="StringTie")
     j.addArguments(base_name)
+
+    # inputs
     add_task_files(dax, j, "StringTie")
+    gff3 = add_gff3_file(dax, j)
+    j.addArguments(gff3)
     j.uses(merged, link=Link.INPUT)
+
+    # outputs
     f = File(base_name + "-merged_counts.fpkm")
     j.uses(f, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)

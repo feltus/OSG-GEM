@@ -5,10 +5,9 @@ reference_prefix = chr21-GRCh38
 
 [inputs]
 
-# if the files exist and are available, specify the file path or urls here
-
-forward = /stash2/user/wpoehlm/OSG_GEM_Experiments/Test_Data/Test_data/TEST_1.fastq.gz
-reverse = /stash2/user/wpoehlm/OSG_GEM_Experiments/Test_Data/Test_data/TEST_2.fastq.gz
+# specify the file path or urls here
+forward = ./Test_data/TEST_1.fastq.gz
+reverse = ./Test_data/TEST_2.fastq.gz
 
 [config]
 
@@ -19,10 +18,8 @@ tophat2 = False
 hisat2 = True
 
 # process using Cufflinks
-
 cufflinks = False
 
 # process using StringTie
-
 stringtie = True
 

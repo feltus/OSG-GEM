@@ -8,8 +8,9 @@ module load cufflinks/2.2.1
 set -v
 
 BASE_NAME=$1
+GFF3=$2
 
-cufflinks -o $BASE_NAME.cuff -G chr21-gencode.v24.annotation.gff3 *.bam
+cufflinks -o $BASE_NAME.cuff -G $GFF3 *.bam
 
 cp $BASE_NAME.cuff/transcripts.gtf .
 

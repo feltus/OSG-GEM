@@ -12,8 +12,9 @@ workflow, so unless you already have a _osg-gem.conf_ file, copy the template:
 
     $ cp osg-gem.conf.template osg-gem.conf
 
-Copy your reference genomes into the _references/_ directory. Note that the it is expected
-that the file has already been indexed and that the index files are copied as well.
+Copy your reference genomes and annotaion files (.gff3) into the _references/_ directory.
+Note that the it is expected that the file has already been indexed and that the index
+files are copied as well.
 
 In _osg-gem.conf_, specify the prefix of the reference genome. Also specify the paths/URLs
 for the input genome.
