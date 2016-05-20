@@ -23,7 +23,7 @@ touch $COMMON_NAME-accepted_hits.bam
 touch $COMMON_NAME-align_summary.txt
 
 java -Xmx512m \
-     -jar trimmomatic-0.33.jar PE -threads 1 -phred33 \
+     -jar trimmomatic-0.36.jar PE -threads 1 -phred33 \
      forward-$COMMON_NAME reverse-$COMMON_NAME \
      left_result.paired_trim.forward_$COMMON_NAME.fastq left_result.unpaired_trim.forward_$COMMON_NAME.fastq \
      right_result.paired_trim.reverse_$COMMON_NAME.fastq right_result.unpaired_trim.reverse_$COMMON_NAME.fastq \
@@ -41,7 +41,10 @@ fi
 
 mkdir work-$$
 
-tophat2 --no-coverage-search -o work-$$ ./$REF_PREFIX \
+tar -xf $REF_PREFIX.transcriptome_data.tar.gz
+
+tophat2 --no-coverage-search --no-novel-juncs --no-novel-indels --no-coverage-search \
+        --transcriptome-index=transcriptome_data/$REF_PREFIX -o work-$$ ./$REF_PREFIX \
         left_result.paired_trim.forward_$COMMON_NAME.fastq \
         right_result.paired_trim.reverse_$COMMON_NAME.fastq \
         | tee $COMMON_NAME-out.txt
@@ -51,7 +54,6 @@ find work-$$
 echo
 
 # we only need the accepted hits, but it needs a unique name
-cp work-$$/accepted_hits.bam $COMMON_NAME-accepted_hits.bam
-cp work-$$/align_summary.txt $COMMON_NAME-align_summary.txt
-
+mv work-$$/accepted_hits.bam $COMMON_NAME-accepted_hits.bam
+mv work-$$/align_summary.txt $COMMON_NAME-align_summary.txt
 
