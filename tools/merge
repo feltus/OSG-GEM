@@ -2,7 +2,7 @@
 
 set -e
 
-module load samtools/0.1.17
+module load samtools/1.3.1
 module load java/8u25
 
 # 1 input file is possible, but samtools can't handle that
