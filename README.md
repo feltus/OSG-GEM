@@ -1,5 +1,5 @@
 # OSG-GEM
-Open Science Grid Workflow That Creates Gene Expression Matrices (GEMs) from SRA/FASTQ NGS Files 
+Open Science Grid Workflow That Creates Gene Expression Matrices (GEMs) from SRA/FASTQ HTS DNA Files 
 
 ## Introduction
 
