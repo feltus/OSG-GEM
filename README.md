@@ -18,19 +18,14 @@ The following tasks are directed by the Pegasus workflow manager:
 -Quantifying RNA transcript levels using StringTie or Cufflinks
 
 It is suggested that the user become familiar with the documentation associated with the following software packages:
-(http://www.usadellab.org/cms/?page=trimmomatic)
 
-[Hisat2](https://ccb.jhu.edu/software/hisat2/manual.shtml) 
-
-(https://ccb.jhu.edu/software/tophat/manual.shtml) -Tophat2
-
-(http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) -Bowtie2
-
-(http://www.htslib.org/doc/samtools.html) -Samtools
-
-(https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual) - StringTie
-
-(http://cole-trapnell-lab.github.io/cufflinks/manual/) -Cufflinks
+* [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
+* [Hisat2](https://ccb.jhu.edu/software/hisat2/manual.shtml)
+* [Tophat2](https://ccb.jhu.edu/software/tophat/manual.shtml)
+* [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml)
+* [Samtools](http://www.htslib.org/doc/samtools.html)
+* [StringTie](https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual)
+* [Cufflinks](http://cole-trapnell-lab.github.io/cufflinks/manual/)
 
 ## Open Science Grid Usage
 
@@ -38,15 +33,15 @@ It is suggested that the user become familiar with the documentation associated 
 
 ## Example Workflow Setup
 
-The worklow cloned from github contains an example config file as well as example input files from the 21st chromosome of Gencode Release 24 of the GRCh38 build of the human reference genome.  Two small FASTQ files containing 
+The worklow cloned from github contains an example config file as well as example input files from the 21st chromosome of Gencode Release 24 of the GRCh38 build of the human reference genome.  Two small FASTQ files containing
 200,000 sequences from NCBI dataset SRR1825962 lie within the _Test_data_ directory of the workflow.  To run the test workflow, the user must copy the _osg-gem.config.template_ file:
 
         $ cp osg-gem.conf.template osg-gem.conf
-        
+
 The workflow, configured to run Hisat2 and Stringtie, can then be launched by running:
 
         $ ./submit
-        
+
 From here, the user may follow our documentation to modify the software options as well as point to their own input dataset.
 
 
@@ -66,13 +61,13 @@ file and gene annotation in GTF/GFF3 format, the following commands can be used 
 ####Generate Tab delimited list of splice sites using gene model GTF file as input (Python DefaultDictionary Module necessary)
 
        $ python hisat2_extract_splice_sites.py GRCh38-gencode.v24.annotation.gtf > GRCh38.Splice_Sites.txt
-       
+
 ### If the user would like to use Tophat2:
 
 ####Index the reference genome
 
        $ bowtie2-build GRCh38.fa GRCh38
-       
+
 ####Generate and Index Reference Transcriptome
 
        $ tophat2 -G GRCh38.gencode.v24.annotation.gff3 --transcriptome-index=transcriptome_data/GRCh38 GRCh38
@@ -196,4 +191,3 @@ TranscriptID    FPKM
 
 
 ## User Modifications to Workflow
-
