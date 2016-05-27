@@ -20,7 +20,7 @@ The following tasks are directed by the Pegasus workflow manager:
 It is suggested that the user become familiar with the documentation associated with the following software packages:
 (http://www.usadellab.org/cms/?page=trimmomatic)
 
-(https://ccb.jhu.edu/software/hisat2/manual.shtml) -Hisat2
+[Hisat2](https://ccb.jhu.edu/software/hisat2/manual.shtml) 
 
 (https://ccb.jhu.edu/software/tophat/manual.shtml) -Tophat2
 
