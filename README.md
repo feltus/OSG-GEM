@@ -3,7 +3,7 @@ Pegasus workflow that utilizes Open Science Grid(OSG) resources to produce a Gen
 
 ## Introduction
 
-This workflow processes raw or compressed paired end FASTQ files to produce a two column matrix of normalized RNA molecule counts(FPKM).  An indexed reference genome along with gene model annotation files must also be obtained prior to configuring
+This workflow processes raw or compressed paired end FASTQ files to produce a two column matrix of normalized RNA molecule counts(FPKM).  An indexed reference genome along with gene model annotation files must be obtained prior to configuring
 and running the workflow.
 The following tasks are directed by the Pegasus workflow manager:
 
@@ -20,17 +20,17 @@ The following tasks are directed by the Pegasus workflow manager:
 It is suggested that the user become familiar with the documentation associated with the following software packages:
 (http://www.usadellab.org/cms/?page=trimmomatic)
 
-(https://ccb.jhu.edu/software/hisat2/manual.shtml)
+(https://ccb.jhu.edu/software/hisat2/manual.shtml) -Hisat2
 
-(https://ccb.jhu.edu/software/tophat/manual.shtml)
+(https://ccb.jhu.edu/software/tophat/manual.shtml) -Tophat2
 
-(http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml)
+(http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) -Bowtie2
 
-(http://www.htslib.org/doc/samtools.html)
+(http://www.htslib.org/doc/samtools.html) -Samtools
 
-(https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual)
+(https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual) - StringTie
 
-(http://cole-trapnell-lab.github.io/cufflinks/manual/)
+(http://cole-trapnell-lab.github.io/cufflinks/manual/) -Cufflinks
 
 ## Open Science Grid Usage
 
@@ -38,12 +38,12 @@ It is suggested that the user become familiar with the documentation associated 
 
 ## Example Workflow Setup
 
-The worklow cloned from github contains an example config file as well as example input files from the 21st chromosome of Gencode Release 24 of the GRCh38 build of the human reference genome, as well as two small FASTQ files containing 
-200,000 sequences from NCBI dataset SRR1825962.  To run the test workflow, the user must copy the _osg-gem.config.template_ file:
+The worklow cloned from github contains an example config file as well as example input files from the 21st chromosome of Gencode Release 24 of the GRCh38 build of the human reference genome.  Two small FASTQ files containing 
+200,000 sequences from NCBI dataset SRR1825962 lie within the _Test_data_ directory of the workflow.  To run the test workflow, the user must copy the _osg-gem.config.template_ file:
 
         $ cp osg-gem.conf.template osg-gem.conf
         
-The workflow can then be launched by running:
+The workflow, configured to run Hisat2 and Stringtie, can then be launched by running:
 
         $ ./submit
         
