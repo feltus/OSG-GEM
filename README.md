@@ -27,8 +27,19 @@ It is suggested that the user become familiar with the documentation associated 
 * [StringTie](https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual)
 * [Cufflinks](http://cole-trapnell-lab.github.io/cufflinks/manual/)
 
-## Open Science Grid Usage
+## Open Science Grid / Execution Environment
 
+The OSG-GEM workflow is designed to execute on the [Open Science Grid](https://www.opensciencegrid.org/) via the
+[OSG Connect](https://osgconnect.net/) infrastructure. Access to the system can be requested on the 
+[sign up page](https://osgconnect.net/signup). 
+
+Once you have an account and have joined a project, a workflow specific ssh key has to be created. This key
+is used for some of the data staging steps of the workflow. 
+
+        $ mkdir -p ~/.ssh
+        $ ssh-keygen -t rsa -b 2048 -f ~/.ssh/workflow
+          (just hit enter when asked for a passphrase)
+        $ cat ~/.ssh/workflow.pub >>~/.ssh/authorized_keys
 
 
 ## Example Workflow Setup
@@ -165,29 +176,27 @@ stringtie = True
 
 Pegasus provides a set of commands to monitor workflow progress.  The path to the worklow files as well as commands to monitor the workflow will print to screen upon submitting the workflow.  For example:
 
-2016.05.26 23:31:03.859 CDT:   Your workflow has been started and is running in
-
-2016.05.26 23:31:03.869 CDT:     /stash2/user/username/workflows/osg-gem-x/workflow/osg-gem-x
-
-2016.05.26 23:31:03.880 CDT:   *** To monitor the workflow you can run ***
-
-2016.05.26 23:31:03.891 CDT:     pegasus-status -l /stash2/user/username/workflows/osg-gem-x/workflow/osg-gem-x
-
-2016.05.26 23:31:03.901 CDT:   *** To remove your workflow run ***
-
-2016.05.26 23:31:03.912 CDT:     pegasus-remove /stash2/user/username/workflows/osg-gem-x/workflow/osg-gem-x
+        2016.05.26 23:31:03.859 CDT:   Your workflow has been started and is running in
+        2016.05.26 23:31:03.869 CDT:     /stash2/user/username/workflows/osg-gem-x/workflow/osg-gem-x
+        2016.05.26 23:31:03.880 CDT:   *** To monitor the workflow you can run ***
+        
+        2016.05.26 23:31:03.891 CDT:     pegasus-status -l /stash2/user/username/workflows/osg-gem-x/workflow/osg-gem-x
+        
+        2016.05.26 23:31:03.901 CDT:   *** To remove your workflow run ***
+        
+        2016.05.26 23:31:03.912 CDT:     pegasus-remove /stash2/user/username/workflows/osg-gem-x/workflow/osg-gem-x
 
 
 Output will be transferred at the base of this directory upon completion.  For example:
 
-    $ cd /stash2/user/username/workflows/osg-gem-x
-    $ ls
-data  outputs  scratch  workflow
+        $ cd /stash2/user/username/workflows/osg-gem-x
+        $ ls
+        data  outputs  scratch  workflow
 
-    $ cd outputs
-    $ head -1 TEST-merged_counts.fpkm
-TranscriptID    FPKM
-
+        $ cd outputs
+        $ head -1 TEST-merged_counts.fpkm
+        TranscriptID    FPKM
 
 
 ## User Modifications to Workflow
+
