@@ -200,3 +200,42 @@ Output will be transferred at the base of this directory upon completion.  For e
 
 ## User Modifications to Workflow
 
+To customize OSG-GEM parameters, basic understanding of the directory structure of the workflow is necessary.  
+
+### Workflow Directory Structure
+
+####Test_data
+
+This contains small FASTQ files for testing.  The user may place their own data in this directory or elsehwere on the OSG filesystems.  
+
+####reference
+
+Contains all reference genome and annotation files, as described previously.
+
+####Tools
+
+This directory contains job wrappers for each step of the workflow.  If the user would like to change software parameters, they may modify the parameters in the files here.  Note that any changes to input filenames in the commands must match the files that are catalogued in the _task-files_ directory (explained below)
+
+####task-files
+
+This directory contains subdirectories for each job that utilizes specific files(eg., python script to parse StringTie output, fasta_adapters.txt file for trimmomatic).
+
+Any files placed in these directories will be transferred to OSG compute nodes for the corresponding jobs.  For example, if the user would like to use a different fasta adapters file 'NewAdapters.txt' for read trimming for the hisat2 job, they would copy this file to the _hisat2_ directory.  Note that the job wrapper in the _tools_ directory must now be modified to match this filename.  
+
+#### Base directory
+
+The base directory of the worfklow contains the _osg-gem.config_ file, the _submit_ script, and a pegasus configuration file. 
+
+The execution environment is catalogued in the _submit_ script, allowing the user to alter the resources requested by the workflow.  
+
+For example:
+
+            <site  handle="condorpool" arch="x86_64" os="LINUX">
+        <profile namespace="pegasus" key="style" >condor</profile>
+        <profile namespace="condor" key="universe" >vanilla</profile>
+        <profile namespace="condor" key="requirements" >OSGVO_OS_STRING == "RHEL 6" &amp;&amp; HAS_MODULES == True &amp;&amp; HAS_SCP == True &amp;&amp; GLIDEIN_ResourceName != "Hyak" &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName1 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName2 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName3 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName4</profile>
+        <profile namespace="condor" key="request_memory" >5 GB</profile>
+        <profile namespace="condor" key="request_disk" >30 GB</profile>
+        <profile namespace="condor" key="+WantsStashCache" >True</profile>
+    </site>
+
