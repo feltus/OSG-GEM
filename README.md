@@ -256,6 +256,19 @@ to request only 3 gigabytes of RAM per job:
 
         <profile namespace="condor" key="request_memory" >3 GB</profile>
         
+###Interchanging Software
+
+This workflow utilizes OASIS software modules that OSG compute nodes can access.  Job wrappers in this workflow load these modules to utilize specific versions of software.  For example, the following software modules are loaded for all _tophat_ jobs using the 'module load' command:
+
+        module load tophat/2.1.1
+        module load samtools/1.3.1
+        module load bowtie/2.2.9
+        module load java/8u25
+        
+If the user would like to plug in alternate software, or would like to use a different version of the available software, an osgconnect user support ticket may be submited to have their software of choice installed as an OASIS module.  
+
+We have also found that precompiled software packages for linux x86_64 architecture have been stable on OSG compute nodes.  The user may utilize these software packages by adding a tar archive of the package to the appropriate task-files directory of the workflow.  This will then be transferred as input to the job, which can be unpacked and utilized for the user's task.  
+        
         
 
         
