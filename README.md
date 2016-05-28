@@ -214,7 +214,7 @@ Contains all reference genome and annotation files, as described previously.
 
 ####Tools
 
-This directory contains job wrappers for each step of the workflow.  If the user would like to change software parameters, they may modify the parameters in the files here.  Note that any changes to input filenames in the commands must match the files that are catalogued in the _task-files_ directory (explained below)
+This directory contains job wrappers for each step of the workflow.  It is suggested that the user becomes familiar with the parameters set for each software to determine if they would like to make changes.  If the user would like to change software parameters, they may modify the commands in the files here.  Note that any changes to input filenames in the commands must match the files that are catalogued in the _task-files_ directory (explained below)
 
 ####task-files
 
@@ -243,18 +243,24 @@ By default, the workflow is cloned with requests for at least 5 GB of memory and
 
         <profile namespace="condor" key="request_memory" >5 GB</profile>
         
-to request six GB of RAM:
+to request six gigabytes of RAM:
 
         <profile namespace="condor" key="request_memory" >6 GB</profile>
         
 
-If the user finds that 5 GB of RAM per job is unnecessary and would like to speed up queue times, they may change:
+If the user finds that 5 gigabytes of RAM per job is unnecessary and would like to speed up queue times, they may change:
 
         <profile namespace="condor" key="request_memory" >5 GB</profile>
 
-to request only 3 GB of RAM per job:
+to request only 3 gigabytes of RAM per job:
 
         <profile namespace="condor" key="request_memory" >3 GB</profile>
+        
+        
+
+        
+        
+
         
         
 
