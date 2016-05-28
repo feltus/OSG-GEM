@@ -46,7 +46,7 @@ cat >sites.xml <<EOF
         <profile namespace="pegasus" key="style" >condor</profile>
         <profile namespace="condor" key="universe" >vanilla</profile>
         <profile namespace="condor" key="requirements" >OSGVO_OS_STRING == "RHEL 6" &amp;&amp; HAS_MODULES == True &amp;&amp; HAS_SCP == True &amp;&amp; GLIDEIN_ResourceName != "Hyak" &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName1 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName2 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName3 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName4</profile>
-        <profile namespace="condor" key="request_memory" >3 GB</profile>
+        <profile namespace="condor" key="request_memory" >5 GB</profile>
         <profile namespace="condor" key="request_disk" >30 GB</profile>
         <profile namespace="condor" key="+WantsStashCache" >True</profile>
     </site>
