@@ -230,12 +230,33 @@ The execution environment is catalogued in the _submit_ script, allowing the use
 
 For example:
 
-            <site  handle="condorpool" arch="x86_64" os="LINUX">
-        <profile namespace="pegasus" key="style" >condor</profile>
-        <profile namespace="condor" key="universe" >vanilla</profile>
-        <profile namespace="condor" key="requirements" >OSGVO_OS_STRING == "RHEL 6" &amp;&amp; HAS_MODULES == True &amp;&amp; HAS_SCP == True &amp;&amp; GLIDEIN_ResourceName != "Hyak" &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName1 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName2 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName3 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName4</profile>
+        <site  handle="condorpool" arch="x86_64" os="LINUX">
+                <profile namespace="pegasus" key="style" >condor</profile>
+                <profile namespace="condor" key="universe" >vanilla</profile>
+                <profile namespace="condor" key="requirements" >OSGVO_OS_STRING == "RHEL 6" &amp;&amp; HAS_MODULES == True &amp;&amp; HAS_SCP == True &amp;&amp; GLIDEIN_ResourceName != "Hyak" &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName1 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName2 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName3 &amp;&amp; TARGET.GLIDEIN_ResourceName =!= MY.MachineAttrGLIDEIN_ResourceName4</profile>
+                <profile namespace="condor" key="request_memory" >5 GB</profile>
+                <profile namespace="condor" key="request_disk" >30 GB</profile>
+                <profile namespace="condor" key="+WantsStashCache" >True</profile>
+        </site>
+
+By default, the workflow is cloned with requests for at least 5 GB of memory and 30 GB of disk space on OSG compute nodes.  If the user is working with an organism with a large reference genome and finds that 5 GB is insufficient, they may change:
+
         <profile namespace="condor" key="request_memory" >5 GB</profile>
-        <profile namespace="condor" key="request_disk" >30 GB</profile>
-        <profile namespace="condor" key="+WantsStashCache" >True</profile>
-    </site>
+        
+to request six GB of RAM:
+
+        <profile namespace="condor" key="request_memory" >6 GB</profile>
+        
+
+If the user finds that 5 GB of RAM per job is unnecessary and would like to speed up queue times, they may change:
+
+        <profile namespace="condor" key="request_memory" >5 GB</profile>
+
+to request only 3 GB of RAM per job:
+
+        <profile namespace="condor" key="request_memory" >3 GB</profile>
+        
+        
+
+
 
