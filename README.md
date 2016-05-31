@@ -224,7 +224,7 @@ Any files placed in these directories will be transferred to OSG compute nodes f
 
 ####useful_files
 
-Contains files that may be useful to users of this workflow.  Currently holds the hisat2_extract_splice_sites.py that comes with the Hisat2 software package.  This script can be used to generate a tab delimited list of splice sites from a GTF gene model file.  
+Contains files that may be useful to users of this workflow.  Currently holds the hisat2_extract_splice_sites.py script that comes with the Hisat2 software package.  This script can be used to generate a tab delimited list of splice sites from a GTF gene model file.  
 
 #### Base directory
 
