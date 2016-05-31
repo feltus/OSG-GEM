@@ -222,7 +222,7 @@ This directory contains subdirectories for each job that utilizes specific files
 
 Any files placed in these directories will be transferred to OSG compute nodes for the corresponding jobs.  For example, if the user would like to use a different fasta adapters file 'NewAdapters.txt' for read trimming for the hisat2 job, they would copy this file to the _hisat2_ directory.  Note that the job wrapper in the _tools_ directory must now be modified to match this filename.  
 
-####usesful_files
+####useful_files
 
 Contains files that may be useful to users of this workflow.  Currently holds the hisat2_extract_splice_sites.py that comes with the Hisat2 software package.  This script can be used to generate a tab delimited list of splice sites from a GTF gene model file.  
 
