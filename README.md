@@ -3,7 +3,7 @@ OSG-GEM is a Pegasus workflow that utilizes Open Science Grid (OSG) resources to
 
 ## Introduction
 
-This workflow processes raw or compressed paired end FASTQ files to produce a two column matrix of normalized RNA molecule counts(FPKM).  An indexed reference genome along with gene model annotation files must be obtained prior to configuring
+This workflow processes raw or compressed paired end FASTQ files to produce a two column matrix of normalized RNA molecule counts (FPKM).  An indexed reference genome along with gene model annotation files must be obtained prior to configuring
 and running the workflow.
 The following tasks are directed by the Pegasus workflow manager:
 
