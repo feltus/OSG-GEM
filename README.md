@@ -7,11 +7,11 @@ This workflow processes raw or compressed paired end FASTQ files to produce a tw
 and running the workflow.
 The following tasks are directed by the Pegasus workflow manager:
 
-*Splitting input FASTQ files into files containing 20,000 sequences each.
-*Trimming raw sequences with Trimmomatic
-*Aligning reads to the reference genome using Hisat2 or Tophat2
-*Merging BAM alignment files into a single sorted BAM file using Samtools
-*Quantifying RNA transcript levels using StringTie or Cufflinks
+* Splitting input FASTQ files into files containing 20,000 sequences each.
+* Trimming raw sequences with Trimmomatic
+* Aligning reads to the reference genome using Hisat2 or Tophat2
+* Merging BAM alignment files into a single sorted BAM file using Samtools
+* Quantifying RNA transcript levels using StringTie or Cufflinks
 
 It is suggested that the user become familiar with the documentation associated with the following software packages:
 
