@@ -5,9 +5,19 @@ reference_prefix = chr21-GRCh38
 
 [inputs]
 
-# specify the file path or urls here
-forward = ./Test_data/TEST_1.fastq.gz
-reverse = ./Test_data/TEST_2.fastq.gz
+#
+# List the inputs to process. Each line can either be a pair
+# of forward and reverse files, separated by a space:
+#
+#    input1 = forward.fastq.gz reverse.fastq.gz
+#
+# or a single SRR number. Example:
+#
+#    input2 = DRR046893
+#
+
+input1 = ./Test_data/TEST_1.fastq.gz ./Test_data/TEST_2.fastq.gz
+input2 = DRR046893
 
 [config]
 

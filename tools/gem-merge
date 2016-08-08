@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+# move all the input files into a subdir
+mkdir inputs
+mv *.fpkm inputs/
+
+perl GEM_merge.pl inputs/ > merged_GEM.tab
+
+

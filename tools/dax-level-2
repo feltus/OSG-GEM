@@ -21,9 +21,9 @@ from Pegasus.DAX3 import *
 
 
 # globals
-task_files = {}
 ref_files = {}
 gff3_files = {}
+fpkm_files = []
 
 # read the config file
 conf = ConfigParser.SafeConfigParser()
@@ -33,16 +33,16 @@ if len(r) != 1:
     sys.exit(1)
 
 
-def add_task_files(dax, job, task_name):
+def add_task_files(task_files, dax, job, task_name):
     """
     add a set of input files from the task-files dir to a task
     """
-    global task_files
     if task_name not in task_files:
         task_files[task_name] = {}
     # add to DAX-level replica catalog
     for fname in os.listdir(base_dir + "/task-files/" + task_name):
         if fname not in task_files[task_name]:
+            print("Adding task file for " + task_name + ": " + fname)
             task_files[task_name][fname] = File(fname)
             task_files[task_name][fname].addPFN( \
                 PFN("file://" + base_dir + "/task-files/" + task_name + "/" + fname, "local"))
@@ -95,8 +95,7 @@ def add_gff3_file(dax, job):
     return rf
 
 
-
-def hisat2(dax, base_name, part, common_part, forward_file, reverse_file):
+def hisat2(task_files, dax, base_name, part, common_part, forward_file, reverse_file):
 
     # Add job
     j = Job(name="hisat2")
@@ -106,25 +105,25 @@ def hisat2(dax, base_name, part, common_part, forward_file, reverse_file):
                    base_name, \
                    part, \
                    common_part)
-    add_task_files(dax, j, "hisat2")
+    add_task_files(task_files, dax, j, "hisat2")
     add_ref_files(dax, j, conf.get("reference", "reference_prefix"))
     j.uses(forward_file, link=Link.INPUT)
     j.uses(reverse_file, link=Link.INPUT)
     # output files
-    f1 = File(common_part + "-accepted_hits.bam")
+    f1 = File(base_name + "-" + common_part + "-accepted_hits.bam")
     j.uses(f1, link=Link.OUTPUT, transfer=False)
     #f2 = File(common_part + "-align_summary.txt")
     #j.uses(f2, link=Link.OUTPUT, transfer=True)
-    f3 = File(common_part + "-out.txt")
+    f3 = File(base_name + "-" + common_part + "-out.txt")
     j.uses(f3, link=Link.OUTPUT, transfer=True)
-    f4 = File(common_part + "-trimmomatic.txt")
+    f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
     j.uses(f4, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
 
     return f1
 
 
-def tophat(dax, base_name, part, common_part, forward_file, reverse_file):
+def tophat(task_files, dax, base_name, part, common_part, forward_file, reverse_file):
 
     # Add job
     j = Job(name="tophat")
@@ -134,18 +133,18 @@ def tophat(dax, base_name, part, common_part, forward_file, reverse_file):
                    base_name, \
                    part, \
                    common_part)
-    add_task_files(dax, j, "tophat")
+    add_task_files(task_files, dax, j, "tophat")
     add_ref_files(dax, j, conf.get("reference", "reference_prefix"))
     j.uses(forward_file, link=Link.INPUT)
     j.uses(reverse_file, link=Link.INPUT)
     # output files
-    f1 = File(common_part + "-accepted_hits.bam")
+    f1 = File(base_name + "-" + common_part + "-accepted_hits.bam")
     j.uses(f1, link=Link.OUTPUT, transfer=False)
-    f2 = File(common_part + "-align_summary.txt")
+    f2 = File(base_name + "-" + common_part + "-align_summary.txt")
     j.uses(f2, link=Link.OUTPUT, transfer=True)
-    f3 = File(common_part + "-out.txt")
+    f3 = File(base_name + "-" + common_part + "-out.txt")
     j.uses(f3, link=Link.OUTPUT, transfer=True)
-    f4 = File(common_part + "-trimmomatic.txt")
+    f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
     j.uses(f4, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
 
@@ -170,56 +169,59 @@ def merge(dax, base_name, in_list):
     return f
 
 
-def cuff(dax, base_name, merged):
+def cuff(task_files, dax, base_name, merged):
+    
+    global fpkm_files
 
     # Add job
     j = Job(name="cuff")
     j.addArguments(base_name)
 
     # inputs
-    add_task_files(dax, j, "cuff")
+    add_task_files(task_files, dax, j, "cuff")
     gff3 = add_gff3_file(dax, j)
     j.addArguments(gff3)
     j.uses(merged, link=Link.INPUT)
 
     # outputs
     f = File(base_name + "-merged_counts.fpkm")
+    fpkm_files.append(f)
     j.uses(f, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
 
     return f
 
 
-def stringtie(dax, base_name, merged):
+def stringtie(task_files, dax, base_name, merged):
+    
+    global fpkm_files
 
     # Add job
     j = Job(name="StringTie")
     j.addArguments(base_name)
 
     # inputs
-    add_task_files(dax, j, "StringTie")
+    add_task_files(task_files, dax, j, "StringTie")
     gff3 = add_gff3_file(dax, j)
     j.addArguments(gff3)
     j.uses(merged, link=Link.INPUT)
 
     # outputs
     f = File(base_name + "-merged_counts.fpkm")
+    fpkm_files.append(f)
     j.uses(f, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
 
     return f
 
 
-def generate_sub_wf(base_name, part):
-    global task_files
-    global ref_files
+def main():
 
     task_files = {}
-    ref_files = {}
-    
+
     # Create a abstract dag
-    dax = AutoADAG("%s-%s" %(base_name, part))
-    
+    dax = AutoADAG("level-2")
+
     # Add executables to the DAX-level replica catalog
     for exe_name in os.listdir(base_dir + "/tools/"):
         exe = Executable(name=exe_name, arch="x86_64", installed=False)
@@ -228,114 +230,80 @@ def generate_sub_wf(base_name, part):
             exe.addProfile(Profile(Namespace.PEGASUS, "clusters.size", 5))
         dax.addExecutable(exe)
 
-    my_data_dir = run_dir + "/data/" + base_name + "/" + part
-
-    accepted_hits = []
-    for in_name in os.listdir(my_data_dir):
-
-        # only need the forward file
-        if not "forward" in in_name:
-            continue
-
-        # use stash urls for the data so we can bypass and grab it directly from
-        # the jobs
-        base_url = "http://stash.osgconnect.net/~" + getpass.getuser() + "/" + run_id + \
-                   "/data/" + base_name + "/" + part
-
-        common_part = in_name
-        common_part = re.sub("forward\-", "", common_part)
-        common_part = re.sub("\.gz", "", common_part)
-        
-        for_file = File("forward-" + common_part)
-        for_file.addPFN(PFN(base_url + "/forward-" + common_part, "stash"))
-        dax.addFile(for_file)
-        
-        rev_file = File("reverse-" + common_part)
-        rev_file.addPFN(PFN(base_url + "/reverse-" + common_part, "stash"))
-        dax.addFile(rev_file)
-   
-        if conf.getboolean("config", "hisat2"):
-            out_file = hisat2(dax, base_name, part, common_part, for_file, rev_file)
-        else:
-            out_file = tophat(dax, base_name, part, common_part, for_file, rev_file)
-        accepted_hits.append(out_file)
-
-    # merge
-    merged = merge(dax, base_name + "-" + part, accepted_hits)
-
-    dax_file = run_dir + "/workflow/" + base_name + "-" + part + ".dax"
-    print("Writing " + dax_file)
-    f = open(dax_file, "w")
-    dax.writeXML(f)
-    f.close()
-
-    return dax_file
-
-
-def main():
-    # Create a abstract dag
-    dax = AutoADAG("level-2")
-
-    # Add executables to the DAX-level replica catalog
-    for exe_name in os.listdir(base_dir + "/tools/"):
-        exe = Executable(name=exe_name, arch="x86_64", installed=False)
-        exe.addPFN(PFN("file://" + base_dir + "/tools/" + exe_name, "local"))
-        dax.addExecutable(exe)
-
     # has to be the one under public/
     data_dir = "/stash2/user/" + getpass.getuser() + "/public/" + run_id + "/data"
 
     # we need a bunch of workflows, and one merge/cuff for each base input
     for base_name in os.listdir(data_dir):
 
-        parents = []
         parts = []
         
         for part in os.listdir(data_dir + "/" + base_name):
 
-            f = generate_sub_wf(base_name, part)
-            subdax_file = File(os.path.basename(f))
-            subdax_file.addPFN(PFN("file://" + f, "local"))
-            dax.addFile(subdax_file)
+            my_data_dir = run_dir + "/data/" + base_name + "/" + part
+        
+            accepted_hits = []
+            for in_name in os.listdir(my_data_dir):
+        
+                # only need the forward file
+                if not "forward" in in_name:
+                    continue
+        
+                # use stash urls for the data so we can bypass and grab it directly from
+                # the jobs
+                base_url = "http://stash.osgconnect.net/~" + getpass.getuser() + "/" + run_id + \
+                           "/data/" + base_name + "/" + part
+        
+                common_part = in_name
+                common_part = re.sub(".*-forward\-", "", common_part)
+                common_part = re.sub("\.gz", "", common_part)
+                
+                for_file = File(base_name + "-forward-" + common_part)
+                for_file.addPFN(PFN(base_url + "/" + base_name + "-forward-" + common_part, "stash"))
+                dax.addFile(for_file)
+                
+                rev_file = File(base_name + "-reverse-" + common_part)
+                rev_file.addPFN(PFN(base_url + "/" + base_name + "-reverse-" + common_part, "stash"))
+                dax.addFile(rev_file)
+           
+                if conf.getboolean("config", "hisat2"):
+                    out_file = hisat2(task_files, dax, base_name, part, common_part, for_file, rev_file)
+                else:
+                    out_file = tophat(task_files, dax, base_name, part, common_part, for_file, rev_file)
+                accepted_hits.append(out_file)
+        
+            # merge
+            merged = merge(dax, base_name + "-" + part, accepted_hits)
 
-            # sub workflow job
-            j = DAX("%s-%s.dax" %(base_name, part))
-            j.addArguments("-Dpegasus.catalog.site.file=%s/sites.xml" % (base_dir),
-                           "--sites", "condorpool",
-                           "--staging-site", "stash",
-                           "--output-site", "local",
-                           "--basename", "%s-%s" %(base_name, part),
-                           "--cluster", "horizontal",
-                           "--force",
-                           "--cleanup", "none")
-            j.uses(subdax_file, link=Link.INPUT)
-            dax.addDAX(j)
-
-            parents.append(j)
             parts.append(part)
             
-        # dummy job to get deps for the merge task
+        # second level merge 
         accepted_hits = []
-        j = Job(name="merge-bridge")
-        j.addArguments(getpass.getuser(), run_id, run_dir, base_name)
         for part in parts:
             f = File(base_name + "-" + part + "-merged.bam")
-            j.uses(f, link=Link.OUTPUT, transfer=False)
             accepted_hits.append(f)
-        j.addProfile(Profile("hints", "execution.site", "local"))
-        dax.addJob(j)
-        for p in parents:
-            dax.depends(parent=p, child=j)
-
-        # merge
         merged = merge(dax, base_name, accepted_hits)
 
         if conf.getboolean("config", "cufflinks"):
             # cuff
-            counts_file = cuff(dax, base_name, merged)
+            cuff(task_files, dax, base_name, merged)
         else:
             # StringTie
-            stringtie(dax, base_name, merged)
+            stringtie(task_files, dax, base_name, merged)
+
+
+    # merge all the fpkms
+    j = Job(name="gem-merge")
+
+    # inputs
+    add_task_files(task_files, dax, j, "gem-merge")
+    for f in fpkm_files:
+        j.uses(f, link=Link.INPUT)
+
+    # outputs
+    f = File("merged_GEM.tab")
+    j.uses(f, link=Link.OUTPUT, transfer=True)
+    dax.addJob(j)
     
     # Write the DAX
     f = open(run_dir + "/workflow/level-2.dax", "w")
