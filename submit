@@ -5,6 +5,8 @@ set -e
 module load stashcp
 
 export PATH=/home/rynge/software/pegasus-4.7.0dev/bin:$PATH
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rynge/software/pegasus-4.7.0dev/bin
+
 
 TOPDIR=`pwd`
 
