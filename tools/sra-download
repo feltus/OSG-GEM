@@ -11,8 +11,7 @@ SRA_ID=$1
 FORWARD=$2
 REVERSE=$3
 
-fastq-dump --split-files --gzip -X 10000 $SRA_ID
-#fastq-dump --split-files --gzip $SRA_ID
+fastq-dump --split-files --gzip $SRA_ID
 
 mv ${SRA_ID}_1.fastq.gz $FORWARD
 mv ${SRA_ID}_2.fastq.gz $REVERSE
