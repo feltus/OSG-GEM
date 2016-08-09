@@ -130,7 +130,7 @@ Each line in the config file can either be a pair of forward and reverse files, 
   
         input1 = forward.fastq.gz reverse.fastq.gz
 
-Or a single SRR number:  
+Or a single SRA ID:  
 
         input2 = DRR046893
 
@@ -150,6 +150,7 @@ reference_prefix = $REF_PREFIX
 
 
 input1 = /path_to_forward_data/TEST_1.fastq.gz ./path_to_reverse_data/TEST_2.fastq.gz or SRAID
+
 input2 = /path_to_forward_data/TEST2_1.fastq.gz ./path_to_reverse_data/TEST2_2.fastq.gz or SRAID
 
 
@@ -178,6 +179,7 @@ reference_prefix = GRCh38
 
 
 input1 = ./Test_data/TEST_1.fastq.gz ./Test_data/TEST_2.fastq.gz
+
 input2 = DRR046893
 
 
