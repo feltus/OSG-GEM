@@ -1,9 +1,12 @@
+##Citation
+Poehlman et al. OSG-GEM: Gene Expression Matrix Construction Using the Open Science Grid. *Bioinformatics and Biology Insights* 2016:10 133–141 doi:  10.4137/BBI.S38193.
+
 # OSG-GEM
 OSG-GEM is a Pegasus workflow that utilizes Open Science Grid (OSG) resources to produce a Gene Expression Matrix (GEM) from DNA sequence files in FASTQ format.  
 
 ## Introduction
 
-This workflow processes raw or compressed paired end FASTQ files to produce a two column matrix of normalized RNA molecule counts (FPKM).  An indexed reference genome along with gene model annotation files must be obtained prior to configuring
+This workflow processes raw or compressed paired end FASTQ files to produce a matrix of normalized RNA molecule counts (FPKM).  OSG-GEM also supports direct input downloads from NCBI SRA for processing.  An indexed reference genome along with gene model annotation files must be obtained prior to configuring
 and running the workflow.
 The following tasks are directed by the Pegasus workflow manager:
 
@@ -83,6 +86,7 @@ file and gene annotation in GTF/GFF3 format, the following commands can be used 
 
        $ tophat2 -G GRCh38.gencode.v24.annotation.gff3 --transcriptome-index=transcriptome_data/GRCh38 GRCh38
        $ tar czf GRCh38.transcriptome_data.tar.gz transcriptome_data/
+       
 
 
 
@@ -115,6 +119,21 @@ $REF_PREFIX.transcriptome_data.tar.gz
 
 $REF_PREFIX.gff3
 
+### User Input Datasets
+
+OSG-GEM supports the processing of multiple input datasets into a single Gene Expression Matrix(GEM).  The user
+may point to paired end FASTQ files on an OSG filesystem, or simply specify NCBI Sequence Read Archive (SRA)
+ID's that they would like to process.  A blend of FASTQ files on OSG, as well as SRA ID's may be provided.  
+
+
+Each line in the config file can either be a pair of forward and reverse files, separated by a space:
+  
+        input1 = forward.fastq.gz reverse.fastq.gz
+
+Or a single SRR number:  
+
+        input2 = DRR046893
+
 
 
 ### Modify _osg-gem.config_ file
@@ -129,9 +148,9 @@ reference_prefix = $REF_PREFIX
 
 [inputs]
 
-forward = /path/to/$DATASET_1.fastq.gz
 
-reverse = /path/to/$DATASET_2.fastq.gz
+input1 = /path_to_forward_data/TEST_1.fastq.gz ./path_to_reverse_data/TEST_2.fastq.gz or SRAID
+input2 = /path_to_forward_data/TEST2_1.fastq.gz ./path_to_reverse_data/TEST2_2.fastq.gz or SRAID
 
 
 #### Select software options
@@ -149,7 +168,7 @@ stringtie = 'True' or 'False'
 
 #### Example _osg-gem.config_ file:
 
-If a user cloned OSG-GEM into '/stash2/user/username/GEM_test', and placed input FASTQ files for dataset 'TEST' in '/stash2/user/username/Data'. To process this dataset using Hisat2 and StringTie with the GRCh38 build of the human reference genome, the osg-gem.config file would be modified as follows:
+If a user cloned OSG-GEM into '/stash2/user/username/GEM_test', and placed input FASTQ files for dataset 'TEST' in '/stash2/user/username/Data'. To process this dataset, along with dataset DRR046893 from NCBI SRA, using Hisat2 and StringTie with the GRCh38 build of the human reference genome, the osg-gem.config file would be modified as follows:
 
 [reference]
 
@@ -157,9 +176,10 @@ reference_prefix = GRCh38
 
 [inputs]
 
-forward = /stash2/user/username/Data/TEST_1.fastq.gz
 
-reverse = /stash2/user/username/Data/TEST_2.fastq.gz
+input1 = ./Test_data/TEST_1.fastq.gz ./Test_data/TEST_2.fastq.gz
+input2 = DRR046893
+
 
 [config]
 
