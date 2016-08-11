@@ -79,6 +79,7 @@ dax.addFile(subdax_file)
 
 print(" ")
 
+prepare_jobs = []
 input_id = 0
 for key, inputs in conf.items("inputs"):
     input_id += 1
@@ -126,14 +127,17 @@ for key, inputs in conf.items("inputs"):
     split2.addArguments(base_dir, reverse_file , data_dir + "/" + str(input_id), str(input_id) + "-reverse")
     split2.addProfile(Profile("hints", "execution.site", "local"))
     dax.addJob(split2)
+
+    prepare_jobs.append(split1)
+    prepare_jobs.append(split2)
     
 # generate sub workflow
 j2 = Job(name="dax-level-2")
 j2.addArguments(run_id, base_dir, run_dir)
 j2.addProfile(Profile("hints", "execution.site", "local"))
 dax.addJob(j2)
-dax.depends(parent=split1, child=j2)
-dax.depends(parent=split2, child=j2)
+for job in prepare_jobs:
+    dax.depends(parent=job, child=j2)
 
 # sub workflow job
 j3 = DAX("level-2.dax")
