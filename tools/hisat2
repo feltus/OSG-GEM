@@ -18,8 +18,8 @@ PART=$5
 COMMON_NAME=$6
 
 # make sure we have empty output files in case of errors
-touch $COMMON_NAME-out.txt
-touch $COMMON_NAME-accepted_hits.bam
+touch $BASE_NAME-$COMMON_NAME-out.txt
+touch $BASE_NAME-$COMMON_NAME-accepted_hits.bam
 
 java -Xmx512m \
      -jar trimmomatic-0.36.jar PE -threads 1 -phred33 \
