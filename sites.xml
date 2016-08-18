@@ -28,6 +28,10 @@
         <profile namespace="condor" key="request_memory" >5 GB</profile>
         <profile namespace="condor" key="request_disk" >30 GB</profile>
         <profile namespace="condor" key="+WantsStashCache" >True</profile>
+
+        <!-- disable OSG squid caching for now -->
+        <profile namespace="env" key="http_proxy" ></profile>
+        <profile namespace="env" key="OSG_SQUID_LOCATION" ></profile>
     </site>
 
 </sitecatalog>

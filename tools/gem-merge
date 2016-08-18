@@ -2,6 +2,29 @@
 
 set -e
 
+# remove "empty" inputs
+for F in `ls *.fpkm`; do
+        SIZE=`du -sb $F | cut -f 1`
+        if [ $SIZE -lt 50 ]; then
+                echo "Removing $F due to it being empty"
+                rm $F
+        fi
+done
+
+echo
+echo
+ls -l
+echo
+echo
+
+# no input files left
+COUNT=`ls *.fpkm 2>/dev/null | wc -l`
+if [ $COUNT = 0 ]; then
+    echo "No fpmk files left - creating an empty .tab"
+    touch merged_GEM.tab
+    exit 0
+fi
+
 # move all the input files into a subdir
 mkdir inputs
 mv *.fpkm inputs/
