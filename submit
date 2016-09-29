@@ -5,14 +5,14 @@ set -e
 module load stashcp
 
 export PATH=/home/rynge/software/pegasus-4.7.0dev/bin:$PATH
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rynge/software/pegasus-4.7.0dev/bin
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rynge/software/pegasus-4.7.0dev/bin
 
 
 TOPDIR=`pwd`
 
 export RUN_ID=osg-gem-`date +'%s'`
 
-export RUN_DIR=/stash2/user/$USER/workflows/$RUN_ID
+export RUN_DIR=/local-scratch/$USER/workflows/$RUN_ID
 mkdir -p $RUN_DIR/scratch/$RUN_ID/level-2
 # make the data availabile over http
 mkdir -p /stash2/user/$USER/public/$RUN_ID/data
