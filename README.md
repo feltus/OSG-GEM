@@ -42,6 +42,7 @@ A workflow specific ssh key has to be created. This key is used for some of the 
         $ mkdir -p ~/.ssh
         $ ssh-keygen -t rsa -b 2048 -f ~/.ssh/workflow
           (just hit enter when asked for a passphrase)
+          
         $ cat ~/.ssh/workflow.pub >>~/.ssh/authorized_keys
 
 Test that the key is set up correctly by sshing from login02 to login02, using the new key:
