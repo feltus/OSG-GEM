@@ -32,18 +32,24 @@ The OSG-GEM workflow is designed to execute on the [Open Science Grid](https://w
 [OSG Connect](https://osgconnect.net/) infrastructure. Access to the system can be requested on the 
 [sign up page](https://osgconnect.net/signup). 
 
-Once you have an account and have joined a project, a workflow specific ssh key has to be created. This key
-is used for some of the data staging steps of the workflow. 
+Once you have an account and have joined a project, login to the login02 submit node.
+This node can be accessed by ssh:
+
+        ssh username@login02.osgconnect.net
+
+A workflow specific ssh key has to be created. This key is used for some of the data staging steps of the workflow. 
 
         $ mkdir -p ~/.ssh
         $ ssh-keygen -t rsa -b 2048 -f ~/.ssh/workflow
           (just hit enter when asked for a passphrase)
         $ cat ~/.ssh/workflow.pub >>~/.ssh/authorized_keys
+
+Test that the key is set up correctly by sshing from login02 to login02, using the new key:
+
+        $ ssh -i ~/.ssh/workflow login02.osgconnect.net
+
+If that works, log out from the new session. You are now ready to submit workflows.
         
-The login02 node may be used to submit this workflow.  This node can be accessed by ssh:
-
-        ssh username@login02.osgconnect.net
-
 
 ## Example Workflow Setup
 
