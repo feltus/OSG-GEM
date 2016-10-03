@@ -112,7 +112,8 @@ for key, inputs in conf.items("inputs"):
         dl.uses(forward_file, link=Link.OUTPUT, transfer=False)
         dl.uses(reverse_file, link=Link.OUTPUT, transfer=False)
         dl.addArguments(inputs, forward_file, reverse_file)
-        dl.addProfile(Profile("hints", "execution.site", "local"))
+        #dl.addProfile(Profile("hints", "execution.site", "local"))
+        dl.addProfile(Profile("dagman", "CATEGORY", "sradownload"))
         dax.addJob(dl)
     
     # set up split jobs
