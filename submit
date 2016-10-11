@@ -29,7 +29,10 @@ export PYTHONPATH=`pegasus-config --python`
 ./tools/dax-level-1 $RUN_ID $RUN_DIR $RUN_DIR/data
 
 echo
-echo "NOTE: at the end of the workflow run, you will find the outputs in $RUN_DIR/outputs"
+echo "An 'Output's directory will be created within the base of the workflow directory."
+echo "This directory, $RUN_DIR/outputs"
+echo "will have a 'merged_GEM.tab' file, an expression vector for each individual file,"
+echo "and all standard output files from trimmomatic/hisat2 jobs."
 
 # plan and submit the  workflow
 echo
