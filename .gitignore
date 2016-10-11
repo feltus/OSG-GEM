@@ -1,4 +1,5 @@
 dax.xml
+sites.xml
 task-files/tophat/*.fa
 task-files/tophat/*.ht2
 task-files/hisat2/*.fa
