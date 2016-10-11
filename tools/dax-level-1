@@ -142,7 +142,7 @@ for job in prepare_jobs:
 
 # sub workflow job
 j3 = DAX("level-2.dax")
-j3.addArguments("-Dpegasus.catalog.site.file=%s/sites.xml" % (base_dir),
+j3.addArguments("-Dpegasus.catalog.site.file=%s/sites.xml" % (run_dir),
                 "--sites", "condorpool",
                 "--staging-site", "stash",
                 "--output-site", "local",

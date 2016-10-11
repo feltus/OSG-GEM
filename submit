@@ -20,6 +20,10 @@ mkdir -p $RUN_DIR/scratch/$RUN_ID/level-2
 mkdir -p /stash2/user/$USER/public/$RUN_ID/data
 ln -s /stash2/user/$USER/public/$RUN_ID/data $RUN_DIR/data
 
+# generate the site catalog
+SC=$RUN_DIR/sites.xml
+envsubst <sites.xml.template >$SC
+
 # generate the dax
 export PYTHONPATH=`pegasus-config --python`
 ./tools/dax-level-1 $RUN_ID $RUN_DIR $RUN_DIR/data
@@ -30,6 +34,7 @@ echo "NOTE: at the end of the workflow run, you will find the outputs in $RUN_DI
 # plan and submit the  workflow
 echo
 pegasus-plan \
+    -Dpegasus.catalog.site.file=$SC \
     --conf pegasus.conf \
     --relative-dir $RUN_ID \
     --sites condorpool \
