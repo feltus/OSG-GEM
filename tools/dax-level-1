@@ -90,10 +90,8 @@ for key, inputs in conf.items("inputs"):
 
     # can either be from the filesystem, remote url, or from a SRA download job
     forward_file = File("forward-" + str(input_id))
-    reverse_file = File("reverse-" + str(input_id))
 
     dax.addFile(forward_file)
-    dax.addFile(reverse_file)
 
     urls = inputs.split(" ")
     if len(urls) == 2:
@@ -101,17 +99,13 @@ for key, inputs in conf.items("inputs"):
         # are the URLs local?
         if not re.search(":", urls[0]):
             urls[0] = "file://" + os.path.abspath(urls[0])
-        if not re.search(":", urls[1]):
-            urls[1] = "file://" + os.path.abspath(urls[1])
 
         forward_file.addPFN(PFN(urls[0], "local"))
-        reverse_file.addPFN(PFN(urls[1], "local"))
     else:
         # SRA input, we need a job first do download and split the data
         dl = Job(name="sra-download")
         dl.uses(forward_file, link=Link.OUTPUT, transfer=False)
-        dl.uses(reverse_file, link=Link.OUTPUT, transfer=False)
-        dl.addArguments(inputs, forward_file, reverse_file)
+        dl.addArguments(inputs, forward_file)
         #dl.addProfile(Profile("hints", "execution.site", "local"))
         dl.addProfile(Profile("dagman", "CATEGORY", "sradownload"))
         dax.addJob(dl)
@@ -123,14 +117,8 @@ for key, inputs in conf.items("inputs"):
     split1.addProfile(Profile("hints", "execution.site", "local"))
     dax.addJob(split1)
     
-    split2 = Job(name="prepare-inputs")
-    split2.uses(reverse_file, link=Link.INPUT)
-    split2.addArguments(base_dir, reverse_file , data_dir + "/" + str(input_id), str(input_id) + "-reverse")
-    split2.addProfile(Profile("hints", "execution.site", "local"))
-    dax.addJob(split2)
 
     prepare_jobs.append(split1)
-    prepare_jobs.append(split2)
     
 # generate sub workflow
 j2 = Job(name="dax-level-2")

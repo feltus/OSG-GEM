@@ -9,12 +9,10 @@ set -e
 
 SRA_ID=$1
 FORWARD=$2
-REVERSE=$3
 
-fastq-dump --split-files --gzip $SRA_ID
+fastq-dump --gzip -X 10000 $SRA_ID
 
-mv ${SRA_ID}_1.fastq.gz $FORWARD
-mv ${SRA_ID}_2.fastq.gz $REVERSE
+mv ${SRA_ID}.fastq.gz $FORWARD
 
 echo
 ls -lh

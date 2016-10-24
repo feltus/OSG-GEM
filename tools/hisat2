@@ -22,23 +22,21 @@ touch $BASE_NAME-$COMMON_NAME-out.txt
 touch $BASE_NAME-$COMMON_NAME-accepted_hits.bam
 
 java -Xmx512m \
-     -jar trimmomatic-0.36.jar PE -threads 1 -phred33 \
-     $BASE_NAME-forward-$COMMON_NAME $BASE_NAME-reverse-$COMMON_NAME \
-     left_result.paired_trim.forward_$COMMON_NAME.fastq left_result.unpaired_trim.forward_$COMMON_NAME.fastq \
-     right_result.paired_trim.reverse_$COMMON_NAME.fastq right_result.unpaired_trim.reverse_$COMMON_NAME.fastq \
+     -jar trimmomatic-0.36.jar SE -threads 1 -phred33 \
+     $BASE_NAME-forward-$COMMON_NAME  \
+     left_result.paired_trim.forward_$COMMON_NAME.fastq \
      ILLUMINACLIP:fasta_adapter.txt:2:40:15 LEADING:3 TRAILING:6 SLIDINGWINDOW:4:15 MINLEN:50 \
      2>&1 | tee $BASE_NAME-$COMMON_NAME-trimmomatic.txt
 
 # empty outputs?
 LEFT_SIZE=`ls -l left_result.paired_trim.forward_$COMMON_NAME.fastq | cut -d ' ' -f 5`
-RIGHT_SIZE=`ls -l right_result.paired_trim.reverse_$COMMON_NAME.fastq | cut -d ' ' -f 5`
-if [ $LEFT_SIZE -lt 50 -o $RIGHT_SIZE -lt 50 ]; then
-    echo "Warning: trimmomatic output was 0 sequences"
-    touch $BASE_NAME-$COMMON_NAME-accepted_hits.bam
-    exit 0
-fi
+#if [ $LEFT_SIZE -lt 50 -o $RIGHT_SIZE -lt 50 ]; then
+#    echo "Warning: trimmomatic output was 0 sequences"
+#    touch $BASE_NAME-$COMMON_NAME-accepted_hits.bam
+#    exit 0
+#fi
 
-hisat2 --no-temp-splicesite --known-splicesite-infile ./$REF_PREFIX.Splice_Sites.txt -x ./$REF_PREFIX -q -1 ./left_result.paired_trim.forward_$COMMON_NAME.fastq -2 ./right_result.paired_trim.reverse_$COMMON_NAME.fastq -S $BASE_NAME-$COMMON_NAME.hits.sam -t --dta-cufflinks 2>&1 | tee $BASE_NAME-$COMMON_NAME-out.txt
+hisat2 --no-temp-splicesite --known-splicesite-infile ./$REF_PREFIX.Splice_Sites.txt -x ./$REF_PREFIX -U left_result.paired_trim.forward_$COMMON_NAME.fastq -S $BASE_NAME-$COMMON_NAME.hits.sam -t --dta-cufflinks 2>&1 | tee $BASE_NAME-$COMMON_NAME-out.txt
 
 # we only need the accepted hits, but it needs a unique name
 mv $BASE_NAME-$COMMON_NAME.hits.sam $BASE_NAME-$COMMON_NAME-accepted_hits.sam
