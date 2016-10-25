@@ -16,7 +16,7 @@ reference_prefix = chr21-GRCh38
 #    input2 = DRR046893
 #
 
-input1 = input1 = ./Test_data/SRR4343300.fastq.gz
+input1 = ./Test_data/SRR4343300.fastq.gz
 
 [config]
 
