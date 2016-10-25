@@ -30,11 +30,11 @@ java -Xmx512m \
 
 # empty outputs?
 LEFT_SIZE=`ls -l left_result.paired_trim.forward_$COMMON_NAME.fastq | cut -d ' ' -f 5`
-#if [ $LEFT_SIZE -lt 50 -o $RIGHT_SIZE -lt 50 ]; then
-#    echo "Warning: trimmomatic output was 0 sequences"
-#    touch $BASE_NAME-$COMMON_NAME-accepted_hits.bam
-#    exit 0
-#fi
+if [ $LEFT_SIZE -o 50]; then
+    echo "Warning: trimmomatic output was 0 sequences"
+    touch $BASE_NAME-$COMMON_NAME-accepted_hits.bam
+    exit 0
+fi
 
 hisat2 --no-temp-splicesite --known-splicesite-infile ./$REF_PREFIX.Splice_Sites.txt -x ./$REF_PREFIX -U left_result.paired_trim.forward_$COMMON_NAME.fastq -S $BASE_NAME-$COMMON_NAME.hits.sam -t --dta-cufflinks 2>&1 | tee $BASE_NAME-$COMMON_NAME-out.txt
 

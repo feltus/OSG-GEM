@@ -94,7 +94,7 @@ for key, inputs in conf.items("inputs"):
     dax.addFile(forward_file)
 
     urls = inputs.split(" ")
-    if len(urls) == 2:
+    if len(urls) == 1 and "fastq" in str(urls):
         # user gave use forward/reverse files to use
         # are the URLs local?
         if not re.search(":", urls[0]):
