@@ -16,8 +16,8 @@
 
     <site  handle="stash" arch="x86_64" os="LINUX">
         <directory type="shared-scratch" path="/stash2/user/${USER}/public">
-            <!-- file-server operation="get" url="http://stash.osgconnect.net/~${USER}"/ -->
-            <file-server operation="get" url="stash:///user/${USER}/public"/>
+            <file-server operation="get" url="http://stash.osgconnect.net/~${USER}"/ -->
+            <!-- file-server operation="get" url="stash:///user/${USER}/public"/ -->
             <file-server operation="put" url="scp://${USER}@login02.osgconnect.net/stash2/user/${USER}/public"/>
         </directory>
     </site>
@@ -31,8 +31,8 @@
         <profile namespace="condor" key="+WantsStashCache" >True</profile>
 
         <!-- disable OSG squid caching for now -->
-        <!-- profile namespace="env" key="http_proxy" ></profile>
-        <profile namespace="env" key="OSG_SQUID_LOCATION" ></profile -->
+        <profile namespace="env" key="http_proxy" ></profile>
+        <profile namespace="env" key="OSG_SQUID_LOCATION" ></profile>
     </site>
 
 </sitecatalog>
