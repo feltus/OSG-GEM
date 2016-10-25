@@ -8,6 +8,11 @@ TOOLS_DIR=$1
 INPUT_FILE=$(readlink -f $2)
 TARGET_DIR=$3
 TEMPLATE_NAME=$4
+
+if ! which pigz >/dev/null 2>&1; then
+    echo "Required tool, pigz, is misisng from this host!" >&2
+    exit 1
+fi
     
 #BASE_NAME=`basename $INPUT_FILE | sed -E 's/^(forward_|reverse_)//' | sed -E 's/(_[12])*(.fastq)*(.gz)*$//g'`
 
