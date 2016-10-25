@@ -10,7 +10,7 @@ set -e
 SRA_ID=$1
 FORWARD=$2
 
-fastq-dump --gzip -X 10000 $SRA_ID
+fastq-dump --gzip $SRA_ID
 
 mv ${SRA_ID}.fastq.gz $FORWARD
 
