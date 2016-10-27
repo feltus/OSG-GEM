@@ -16,7 +16,7 @@
 
     <site  handle="stash" arch="x86_64" os="LINUX">
         <directory type="shared-scratch" path="/stash2/user/${USER}/public">
-            <file-server operation="get" url="http://stash.osgconnect.net/~${USER}"/ -->
+            <file-server operation="get" url="http://stash.osgconnect.net/~${USER}"/>
             <!-- file-server operation="get" url="stash:///user/${USER}/public"/ -->
             <file-server operation="put" url="scp://${USER}@login02.osgconnect.net/stash2/user/${USER}/public"/>
         </directory>
