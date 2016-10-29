@@ -3,8 +3,6 @@
 set -e
 
 module load samtools/1.3.1
-module load bowtie/2.2.9
-module load hisat2/2.0.3-beta
 module load java/8u25
 
 set -v
@@ -38,7 +36,9 @@ if [ $LEFT_SIZE -lt 50 -o $RIGHT_SIZE -lt 50 ]; then
     exit 0
 fi
 
-hisat2 --no-temp-splicesite --known-splicesite-infile ./$REF_PREFIX.Splice_Sites.txt -x ./$REF_PREFIX -q -1 ./left_result.paired_trim.forward_$COMMON_NAME.fastq -2 ./right_result.paired_trim.reverse_$COMMON_NAME.fastq -S $BASE_NAME-$COMMON_NAME.hits.sam -t --dta-cufflinks 2>&1 | tee $BASE_NAME-$COMMON_NAME-out.txt
+unzip hisat2-2.0.4-Linux_x86_64.zip
+
+hisat2-2.0.4/hisat2 --no-temp-splicesite --known-splicesite-infile ./$REF_PREFIX.Splice_Sites.txt -x ./$REF_PREFIX -q -1 ./left_result.paired_trim.forward_$COMMON_NAME.fastq -2 ./right_result.paired_trim.reverse_$COMMON_NAME.fastq -S $BASE_NAME-$COMMON_NAME.hits.sam -t --dta-cufflinks 2>&1 | tee $BASE_NAME-$COMMON_NAME-out.txt
 
 # we only need the accepted hits, but it needs a unique name
 mv $BASE_NAME-$COMMON_NAME.hits.sam $BASE_NAME-$COMMON_NAME-accepted_hits.sam
