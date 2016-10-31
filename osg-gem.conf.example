@@ -20,6 +20,10 @@ input1 = ./Test_data/SRR4343300.fastq.gz
 
 [config]
 
+# Memory available to the jobs. This should be roughly 2X the
+# size of the reference genome, rounded up whole GB
+memory = 8 GB
+
 # process using TopHat2
 tophat2 = False
 

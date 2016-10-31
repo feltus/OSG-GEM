@@ -220,12 +220,18 @@ def main():
     # Create a abstract dag
     dax = AutoADAG("level-2")
 
+    # memory requirements
+    memory = "2G"
+    if conf.has_option("config", "memory"):
+        memory = conf.get("config", "memory")
+
     # Add executables to the DAX-level replica catalog
     for exe_name in os.listdir(base_dir + "/tools/"):
         exe = Executable(name=exe_name, arch="x86_64", installed=False)
         exe.addPFN(PFN("file://" + base_dir + "/tools/" + exe_name, "local"))
         if exe_name == "tophat" or exe_name == "hisat2":
             exe.addProfile(Profile(Namespace.PEGASUS, "clusters.size", 5))
+        exe.addProfile(Profile(Namespace.CONDOR, "request_memory", memory))
         dax.addExecutable(exe)
 
     # has to be the one under public/
