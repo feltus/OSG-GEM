@@ -7,6 +7,8 @@ task-files/hisat2/*.ht2
 reference/*.fa
 reference/*.bt2
 reference/*.ht2
+reference/*.txt
+reference/*.gtf
 tools/AutoADAG.pyc
 osg-gem.conf
 

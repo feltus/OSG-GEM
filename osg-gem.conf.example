@@ -21,6 +21,10 @@ input2 = DRR046893
 
 [config]
 
+# Memory available to the jobs. This should be roughly 2X the
+# size of the reference genome, rounded up whole GB
+memory = 8 GB
+
 # process using TopHat2
 tophat2 = False
 
