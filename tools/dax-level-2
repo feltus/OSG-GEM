@@ -236,8 +236,11 @@ def main():
         exe.addProfile(Profile(Namespace.CONDOR, "request_memory", memory))
         dax.addExecutable(exe)
 
-    # has to be the one under public/
-    data_dir = "/stash2/user/" + getpass.getuser() + "/public/" + run_id + "/data"
+    # on OSG Connect, has to be the one under public/
+    if os.path.exists("/stash2"):
+        data_dir = "/stash2/user/" + getpass.getuser() + "/public/" + run_id + "/data"
+    else:
+        data_dir = run_dir + "/data"
 
     # we need a bunch of workflows, and one merge/cuff for each base input
     for base_name in os.listdir(data_dir):
@@ -256,20 +259,25 @@ def main():
                     continue
         
                 # use stash urls for the data so we can bypass and grab it directly from
-                # the jobs
-                base_url = "http://stash.osgconnect.net/~" + getpass.getuser() + "/" + run_id + \
-                           "/data/" + base_name + "/" + part
+                # the jobs (OSG Connect uses stash)
+                if os.path.exists("/stash2"):
+                    base_url = "http://stash.osgconnect.net/~" + getpass.getuser() + "/" + run_id + \
+                               "/data/" + base_name + "/" + part
+                    site_name = "stash"
+                else:
+                    base_url = "file://" + run_dir + "/data/" + base_name + "/" + part
+                    site_name = "local"
         
                 common_part = in_name
                 common_part = re.sub(".*-forward\-", "", common_part)
                 common_part = re.sub("\.gz", "", common_part)
                 
                 for_file = File(base_name + "-forward-" + common_part)
-                for_file.addPFN(PFN(base_url + "/" + base_name + "-forward-" + common_part, "stash"))
+                for_file.addPFN(PFN(base_url + "/" + base_name + "-forward-" + common_part, site_name))
                 dax.addFile(for_file)
                 
                 rev_file = File(base_name + "-reverse-" + common_part)
-                rev_file.addPFN(PFN(base_url + "/" + base_name + "-reverse-" + common_part, "stash"))
+                rev_file.addPFN(PFN(base_url + "/" + base_name + "-reverse-" + common_part, site_name))
                 dax.addFile(rev_file)
            
                 if conf.getboolean("config", "hisat2"):

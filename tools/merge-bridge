@@ -9,7 +9,11 @@ BASE_NAME="$4"
 
 START_DIR=`pwd`
 
-cd /stash2/user/$CONNECT_USER/public/$RUN_ID/level-2
+if [ -e /stash2/user/$CONNECT_USER/public/$RUN_ID/level-2 ]; then
+    cd /stash2/user/$CONNECT_USER/public/$RUN_ID/level-2
+else
+    cd $HOME/workflows/$RUN_ID/data
+fi
 
 for DIR in `ls -d $BASE_NAME-*`; do
     cd $DIR

@@ -2,49 +2,89 @@
 
 set -e
 
-# needed for stashcp to be picked up the site catalog for the local site
-module load xrootd
-module load stashcp
+# are we on OSG Connect?
+if [ -e /stash2 ]; then
 
-export PATH=/home/rynge/software/pegasus-4.7.0dev/bin:$PATH
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rynge/software/pegasus-4.7.0dev/bin
+    # needed for stashcp to be picked up the site catalog for the local site
+    module load xrootd
+    module load stashcp
+    
+    export PATH=/home/rynge/software/pegasus-4.7.0dev/bin:$PATH
+    
+    TOPDIR=`pwd`
+    
+    export RUN_ID=osg-gem-`date +'%s'`
+    
+    export RUN_DIR=/local-scratch/$USER/workflows/$RUN_ID
+    mkdir -p $RUN_DIR/scratch/$RUN_ID/level-2
+    # make the data availabile over http
+    mkdir -p /stash2/user/$USER/public/$RUN_ID/data
+    ln -s /stash2/user/$USER/public/$RUN_ID/data $RUN_DIR/data
+    
+    # generate the site catalog
+    SC=$RUN_DIR/sites.xml
+    envsubst <sites.xml.template >$SC
+    
+    # generate the dax
+    export PYTHONPATH=`pegasus-config --python`
+    ./tools/dax-level-1 $RUN_ID $RUN_DIR $RUN_DIR/data
+    
+    echo
+    echo "An 'Output's directory will be created within the base of the workflow directory."
+    echo "This directory, $RUN_DIR/outputs"
+    echo "will have a 'merged_GEM.tab' file, an expression vector for each individual file,"
+    echo "and all standard output files from trimmomatic/hisat2 jobs."
+    
+    # plan and submit the  workflow
+    echo
+    pegasus-plan \
+        -Dpegasus.catalog.site.file=$SC \
+        --conf pegasus.conf \
+        --relative-dir $RUN_ID \
+        --sites condorpool \
+        --staging-site stash \
+        --output-site local \
+        --dir $RUN_DIR/workflow \
+        --dax dax.xml \
+        --submit
 
+else
+    # jetstream
 
-TOPDIR=`pwd`
+    TOPDIR=`pwd`
+    
+    export RUN_ID=osg-gem-`date +'%s'`
+    
+    export RUN_DIR=$HOME/workflows/$RUN_ID
+    mkdir -p $RUN_DIR/scratch/$RUN_ID/level-2
+    mkdir -p $RUN_DIR/data
+    
+    # generate the site catalog
+    SC=$RUN_DIR/sites.xml
+    envsubst <sites.xml.template >$SC
+    
+    # generate the dax
+    export PYTHONPATH=`pegasus-config --python`
+    ./tools/dax-level-1 $RUN_ID $RUN_DIR $RUN_DIR/data
+    
+    echo
+    echo "An 'Output's directory will be created within the base of the workflow directory."
+    echo "This directory, $RUN_DIR/outputs"
+    echo "will have a 'merged_GEM.tab' file, an expression vector for each individual file,"
+    echo "and all standard output files from trimmomatic/hisat2 jobs."
+    
+    # plan and submit the  workflow
+    echo
+    pegasus-plan \
+        -Dpegasus.catalog.site.file=$SC \
+        --conf pegasus.conf \
+        --relative-dir $RUN_ID \
+        --sites jetstream-condorpool \
+        --staging-site jetstream-staging \
+        --output-site local \
+        --dir $RUN_DIR/workflow \
+        --dax dax.xml \
+        --submit
 
-export RUN_ID=osg-gem-`date +'%s'`
-
-export RUN_DIR=/local-scratch/$USER/workflows/$RUN_ID
-mkdir -p $RUN_DIR/scratch/$RUN_ID/level-2
-# make the data availabile over http
-mkdir -p /stash2/user/$USER/public/$RUN_ID/data
-ln -s /stash2/user/$USER/public/$RUN_ID/data $RUN_DIR/data
-
-# generate the site catalog
-SC=$RUN_DIR/sites.xml
-envsubst <sites.xml.template >$SC
-
-# generate the dax
-export PYTHONPATH=`pegasus-config --python`
-./tools/dax-level-1 $RUN_ID $RUN_DIR $RUN_DIR/data
-
-echo
-echo "An 'Output's directory will be created within the base of the workflow directory."
-echo "This directory, $RUN_DIR/outputs"
-echo "will have a 'merged_GEM.tab' file, an expression vector for each individual file,"
-echo "and all standard output files from trimmomatic/hisat2 jobs."
-
-# plan and submit the  workflow
-echo
-pegasus-plan \
-    -Dpegasus.catalog.site.file=$SC \
-    --conf pegasus.conf \
-    --relative-dir $RUN_ID \
-    --sites condorpool \
-    --staging-site stash \
-    --output-site local \
-    --dir $RUN_DIR/workflow \
-    --dax dax.xml \
-    --submit
-
+fi
 
