@@ -34,5 +34,18 @@
         <profile namespace="env" key="http_proxy" ></profile>
         <profile namespace="env" key="OSG_SQUID_LOCATION" ></profile>
     </site>
+    
+    <site  handle="jetstream-staging" arch="x86_64" os="LINUX">
+        <directory type="shared-scratch" path="/tmp/staging-${USER}">
+            <file-server operation="all" url="scp://${USER}@${HOSTNAME}/tmp/staging-${USER}"/>
+        </directory>
+    </site>
+
+    <site  handle="jetstream-condorpool" arch="x86_64" os="LINUX">
+        <profile namespace="pegasus" key="style" >condor</profile>
+        <profile namespace="condor" key="universe" >vanilla</profile>
+        <profile namespace="condor" key="request_memory" >2 GB</profile>
+        <profile namespace="condor" key="request_disk" >1 GB</profile>
+    </site>
 
 </sitecatalog>

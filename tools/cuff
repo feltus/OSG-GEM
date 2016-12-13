@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# module init required when running on non-OSG resources, and has to sourced
+# before set -e as sometimes it exits non-0 when a module environment is 
+# already set up
+. /cvmfs/oasis.opensciencegrid.org/osg/sw/module-init.sh
+
 set -e
 
 module load java/8u25

@@ -130,13 +130,23 @@ for job in prepare_jobs:
 
 # sub workflow job
 j3 = DAX("level-2.dax")
-j3.addArguments("-Dpegasus.catalog.site.file=%s/sites.xml" % (run_dir),
-                "--sites", "condorpool",
-                "--staging-site", "stash",
-                "--output-site", "local",
-                "--basename", "level-2",
-                "--force",
-                "--cleanup", "none")
+# are we on OSG Connect?
+if os.path.exists("/stash2"):
+    j3.addArguments("-Dpegasus.catalog.site.file=%s/sites.xml" % (run_dir),
+                    "--sites", "condorpool",
+                    "--staging-site", "stash",
+                    "--output-site", "local",
+                    "--basename", "level-2",
+                    "--force",
+                    "--cleanup", "none")
+else:
+    j3.addArguments("-Dpegasus.catalog.site.file=%s/sites.xml" % (run_dir),
+                    "--sites", "jetstream-condorpool",
+                    "--staging-site", "jetstream-staging",
+                    "--output-site", "local",
+                    "--basename", "level-2",
+                    "--force",
+                    "--cleanup", "none")
 j3.uses(subdax_file, link=Link.INPUT)
 dax.addDAX(j3)
 dax.depends(parent=j2, child=j3)
