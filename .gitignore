@@ -11,4 +11,6 @@ reference/*.txt
 reference/*.gtf
 tools/AutoADAG.pyc
 osg-gem.conf
+staging
+runs
 
