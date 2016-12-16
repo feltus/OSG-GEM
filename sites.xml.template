@@ -36,8 +36,8 @@
     </site>
     
     <site  handle="jetstream-staging" arch="x86_64" os="LINUX">
-        <directory type="shared-scratch" path="/tmp/staging-${USER}">
-            <file-server operation="all" url="scp://${USER}@${HOSTNAME}/tmp/staging-${USER}"/>
+        <directory type="shared-scratch" path="${PWD}/staging">
+            <file-server operation="all" url="scp://${USER}@${HOSTNAME}${PWD}/staging"/>
         </directory>
     </site>
 

@@ -55,7 +55,7 @@ else
     
     export RUN_ID=osg-gem-`date +'%s'`
     
-    export RUN_DIR=$HOME/workflows/$RUN_ID
+    export RUN_DIR=$PWD/runs/$RUN_ID
     mkdir -p $RUN_DIR/scratch/$RUN_ID/level-2
     mkdir -p $RUN_DIR/data
     
