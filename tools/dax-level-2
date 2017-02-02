@@ -24,7 +24,7 @@ from Pegasus.DAX3 import *
 ref_files = {}
 gff3_files = {}
 fpkm_files = []
-
+log_files = []
 # read the config file
 conf = ConfigParser.SafeConfigParser()
 r = conf.read(base_dir + "/osg-gem.conf")
@@ -115,9 +115,11 @@ def hisat2(task_files, dax, base_name, part, common_part, forward_file, reverse_
     #f2 = File(common_part + "-align_summary.txt")
     #j.uses(f2, link=Link.OUTPUT, transfer=True)
     f3 = File(base_name + "-" + common_part + "-out.txt")
+    log_files.append(f3)
     j.uses(f3, link=Link.OUTPUT, transfer=True)
     f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
     j.uses(f4, link=Link.OUTPUT, transfer=True)
+    log_files.append(f4)
     dax.addJob(j)
 
     return f1
@@ -142,10 +144,12 @@ def tophat(task_files, dax, base_name, part, common_part, forward_file, reverse_
     j.uses(f1, link=Link.OUTPUT, transfer=False)
     f2 = File(base_name + "-" + common_part + "-align_summary.txt")
     j.uses(f2, link=Link.OUTPUT, transfer=True)
+    log_files.append(f2)
     f3 = File(base_name + "-" + common_part + "-out.txt")
     j.uses(f3, link=Link.OUTPUT, transfer=True)
     f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
     j.uses(f4, link=Link.OUTPUT, transfer=True)
+    log_files.append(f4)
     dax.addJob(j)
 
     return f1
@@ -308,15 +312,22 @@ def main():
 
     # merge all the fpkms
     j = Job(name="gem-merge")
-
+    if conf.getboolean("config", "hisat2"):
+        j.addArguments("hisat2")
+    elif conf.getboolean("config", "tophat2"):
+        j.addArguments("tophat2")
     # inputs
     add_task_files(task_files, dax, j, "gem-merge")
     for f in fpkm_files:
         j.uses(f, link=Link.INPUT)
+    for g in log_files:
+        j.uses(g, link=Link.INPUT)
 
     # outputs
     f = File("merged_GEM.tab")
+    g = File("QC_Report.tab")
     j.uses(f, link=Link.OUTPUT, transfer=True)
+    j.uses(g, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
     
     # Write the DAX

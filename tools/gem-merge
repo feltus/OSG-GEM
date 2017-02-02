@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SOFTWARE=$1
+
 set -e
 
 # remove "empty" inputs
@@ -31,4 +33,4 @@ mv *.fpkm inputs/
 
 perl GEM_merge.pl inputs/ > merged_GEM.tab
 
-
+python Log_merge.py $SOFTWARE > QC_Report.tab

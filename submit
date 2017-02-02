@@ -33,7 +33,7 @@ if [ -e /stash2 ]; then
     echo "An 'Output's directory will be created within the base of the workflow directory."
     echo "This directory, $RUN_DIR/outputs"
     echo "will have a 'merged_GEM.tab' file, an expression vector for each individual file,"
-    echo "and all standard output files from trimmomatic/hisat2 jobs."
+    echo "and a report of trimming and alignment statistics, QC_Report.tab"
     
     # plan and submit the  workflow
     echo
