@@ -95,65 +95,124 @@ def add_gff3_file(dax, job):
     return rf
 
 
-def hisat2(task_files, dax, base_name, part, common_part, forward_file, reverse_file):
+if conf.getboolean("config", "paired"):
 
-    # Add job
-    j = Job(name="hisat2")
-    j.addArguments(getpass.getuser(), \
-                   run_id, \
-                   conf.get("reference", "reference_prefix"), \
-                   base_name, \
-                   part, \
-                   common_part)
-    add_task_files(task_files, dax, j, "hisat2")
-    add_ref_files(dax, j, conf.get("reference", "reference_prefix"))
-    j.uses(forward_file, link=Link.INPUT)
-    j.uses(reverse_file, link=Link.INPUT)
-    # output files
-    f1 = File(base_name + "-" + common_part + "-accepted_hits.bam")
-    j.uses(f1, link=Link.OUTPUT, transfer=False)
-    #f2 = File(common_part + "-align_summary.txt")
-    #j.uses(f2, link=Link.OUTPUT, transfer=True)
-    f3 = File(base_name + "-" + common_part + "-out.txt")
-    log_files.append(f3)
-    j.uses(f3, link=Link.OUTPUT, transfer=True)
-    f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
-    j.uses(f4, link=Link.OUTPUT, transfer=True)
-    log_files.append(f4)
-    dax.addJob(j)
+    def hisat2(task_files, dax, base_name, part, common_part, forward_file, reverse_file):
 
-    return f1
+        # Add job
+        j = Job(name="hisat2")
+        j.addArguments(getpass.getuser(), \
+                       run_id, \
+                       conf.get("reference", "reference_prefix"), \
+                       base_name, \
+                       part, \
+                       common_part, "paired")
+        add_task_files(task_files, dax, j, "hisat2")
+        add_ref_files(dax, j, conf.get("reference", "reference_prefix"))
+        j.uses(forward_file, link=Link.INPUT)
+        j.uses(reverse_file, link=Link.INPUT)
+        # output files
+        f1 = File(base_name + "-" + common_part + "-accepted_hits.bam")
+        j.uses(f1, link=Link.OUTPUT, transfer=False)
+        #f2 = File(common_part + "-align_summary.txt")
+        #j.uses(f2, link=Link.OUTPUT, transfer=True)
+        f3 = File(base_name + "-" + common_part + "-out.txt")
+        log_files.append(f3)
+        j.uses(f3, link=Link.OUTPUT, transfer=True)
+        f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
+        j.uses(f4, link=Link.OUTPUT, transfer=True)
+        log_files.append(f4)
+        dax.addJob(j)
 
+        return f1
 
-def tophat(task_files, dax, base_name, part, common_part, forward_file, reverse_file):
+    def tophat(task_files, dax, base_name, part, common_part, forward_file, reverse_file):
 
-    # Add job
-    j = Job(name="tophat")
-    j.addArguments(getpass.getuser(), \
-                   run_id, \
-                   conf.get("reference", "reference_prefix"), \
-                   base_name, \
-                   part, \
-                   common_part)
-    add_task_files(task_files, dax, j, "tophat")
-    add_ref_files(dax, j, conf.get("reference", "reference_prefix"))
-    j.uses(forward_file, link=Link.INPUT)
-    j.uses(reverse_file, link=Link.INPUT)
-    # output files
-    f1 = File(base_name + "-" + common_part + "-accepted_hits.bam")
-    j.uses(f1, link=Link.OUTPUT, transfer=False)
-    f2 = File(base_name + "-" + common_part + "-align_summary.txt")
-    j.uses(f2, link=Link.OUTPUT, transfer=True)
-    log_files.append(f2)
-    f3 = File(base_name + "-" + common_part + "-out.txt")
-    j.uses(f3, link=Link.OUTPUT, transfer=True)
-    f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
-    j.uses(f4, link=Link.OUTPUT, transfer=True)
-    log_files.append(f4)
-    dax.addJob(j)
+        # Add job
+        j = Job(name="tophat")
+        j.addArguments(getpass.getuser(), \
+                       run_id, \
+                       conf.get("reference", "reference_prefix"), \
+                       base_name, \
+                       part, \
+                       common_part, "paired")
+        add_task_files(task_files, dax, j, "tophat")
+        add_ref_files(dax, j, conf.get("reference", "reference_prefix"))
+        j.uses(forward_file, link=Link.INPUT)
+        j.uses(reverse_file, link=Link.INPUT)
+        # output files
+        f1 = File(base_name + "-" + common_part + "-accepted_hits.bam")
+        j.uses(f1, link=Link.OUTPUT, transfer=False)
+        f2 = File(base_name + "-" + common_part + "-align_summary.txt")
+        j.uses(f2, link=Link.OUTPUT, transfer=True)
+        log_files.append(f2)
+        f3 = File(base_name + "-" + common_part + "-out.txt")
+        j.uses(f3, link=Link.OUTPUT, transfer=True)
+        f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
+        j.uses(f4, link=Link.OUTPUT, transfer=True)
+        log_files.append(f4)
+        dax.addJob(j)
 
-    return f1
+        return f1
 
+elif conf.getboolean("config", "single"):
+ 
+
+    def hisat2(task_files, dax, base_name, part, common_part, forward_file):
+
+        # Add job
+        j = Job(name="hisat2")
+        j.addArguments(getpass.getuser(), \
+                       run_id, \
+                       conf.get("reference", "reference_prefix"), \
+                       base_name, \
+                       part, \
+                       common_part, "single")
+        add_task_files(task_files, dax, j, "hisat2")
+        add_ref_files(dax, j, conf.get("reference", "reference_prefix"))
+        j.uses(forward_file, link=Link.INPUT)
+        # output files
+        f1 = File(base_name + "-" + common_part + "-accepted_hits.bam")
+        j.uses(f1, link=Link.OUTPUT, transfer=False)
+        #f2 = File(common_part + "-align_summary.txt")
+        #j.uses(f2, link=Link.OUTPUT, transfer=True)
+        f3 = File(base_name + "-" + common_part + "-out.txt")
+        log_files.append(f3)
+        j.uses(f3, link=Link.OUTPUT, transfer=True)
+        f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
+        log_files.append(f4)
+        j.uses(f4, link=Link.OUTPUT, transfer=True)
+        dax.addJob(j)
+
+        return f1
+
+    def tophat(task_files, dax, base_name, part, common_part, forward_file):
+
+        # Add job
+        j = Job(name="tophat")
+        j.addArguments(getpass.getuser(), \
+                       run_id, \
+                       conf.get("reference", "reference_prefix"), \
+                       base_name, \
+                       part, \
+                       common_part, "single")
+        add_task_files(task_files, dax, j, "tophat")
+        add_ref_files(dax, j, conf.get("reference", "reference_prefix"))
+        j.uses(forward_file, link=Link.INPUT)
+        # output files
+        f1 = File(base_name + "-" + common_part + "-accepted_hits.bam")
+        j.uses(f1, link=Link.OUTPUT, transfer=False)
+        f2 = File(base_name + "-" + common_part + "-align_summary.txt")
+        log_files.append(f2)
+        j.uses(f2, link=Link.OUTPUT, transfer=True)
+        f3 = File(base_name + "-" + common_part + "-out.txt")
+        j.uses(f3, link=Link.OUTPUT, transfer=True)
+        f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
+        log_files.append(f4)
+        j.uses(f4, link=Link.OUTPUT, transfer=True)
+        dax.addJob(j)
+
+        return f1
 
 def merge(dax, base_name, in_list):
 
@@ -280,14 +339,23 @@ def main():
                 for_file.addPFN(PFN(base_url + "/" + base_name + "-forward-" + common_part, site_name))
                 dax.addFile(for_file)
                 
-                rev_file = File(base_name + "-reverse-" + common_part)
-                rev_file.addPFN(PFN(base_url + "/" + base_name + "-reverse-" + common_part, site_name))
-                dax.addFile(rev_file)
+                if conf.getboolean("config", "paired"):
+                    rev_file = File(base_name + "-reverse-" + common_part)
+                    rev_file.addPFN(PFN(base_url + "/" + base_name + "-reverse-" + common_part, site_name))
+                    dax.addFile(rev_file)
            
-                if conf.getboolean("config", "hisat2"):
+                if conf.getboolean("config", "hisat2") and conf.getboolean("config", "paired"):
                     out_file = hisat2(task_files, dax, base_name, part, common_part, for_file, rev_file)
-                else:
+                
+                elif conf.getboolean("config", "hisat2") and conf.getboolean("config", "single"):
+                    out_file = hisat2(task_files, dax, base_name, part, common_part, for_file)
+
+                elif conf.getboolean("config", "tophat2") and conf.getboolean("config", "paired"):
                     out_file = tophat(task_files, dax, base_name, part, common_part, for_file, rev_file)
+                
+                elif conf.getboolean("config", "tophat2") and conf.getboolean("config", "single"):
+                    out_file = tophat(task_files, dax, base_name, part, common_part, for_file)
+   
                 accepted_hits.append(out_file)
         
             # merge
@@ -316,6 +384,10 @@ def main():
         j.addArguments("hisat2")
     elif conf.getboolean("config", "tophat2"):
         j.addArguments("tophat2")
+    if conf.getboolean("config", "paired"):
+        j.addArguments("paired")
+    elif conf.getboolean("config", "single"):
+        j.addArguments("single")
     # inputs
     add_task_files(task_files, dax, j, "gem-merge")
     for f in fpkm_files:

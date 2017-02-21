@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # module init required when running on non-OSG resources, and has to sourced
-# before set -e as sometimes it exits non-0 when a module environment is 
+# before set -e as sometimes it exits non-0 when a module environment is
 # already set up
 . /cvmfs/oasis.opensciencegrid.org/osg/sw/module-init.sh
 
@@ -19,32 +19,58 @@ REF_PREFIX=$3
 BASE_NAME=$4
 PART=$5
 COMMON_NAME=$6
+LAYOUT=$7
 
 # make sure we have empty output files in case of errors
 touch $BASE_NAME-$COMMON_NAME-out.txt
 touch $BASE_NAME-$COMMON_NAME-accepted_hits.bam
 
-java -Xmx512m \
-     -jar trimmomatic-0.36.jar PE -threads 1 -phred33 \
-     $BASE_NAME-forward-$COMMON_NAME $BASE_NAME-reverse-$COMMON_NAME \
-     left_result.paired_trim.forward_$COMMON_NAME.fastq left_result.unpaired_trim.forward_$COMMON_NAME.fastq \
-     right_result.paired_trim.reverse_$COMMON_NAME.fastq right_result.unpaired_trim.reverse_$COMMON_NAME.fastq \
-     ILLUMINACLIP:fasta_adapter.txt:2:40:15 LEADING:3 TRAILING:6 SLIDINGWINDOW:4:15 MINLEN:50 \
-     2>&1 | tee $BASE_NAME-$COMMON_NAME-trimmomatic.txt
+if [ $LAYOUT = "paired" ] ; then
 
-# empty outputs?
-LEFT_SIZE=`ls -l left_result.paired_trim.forward_$COMMON_NAME.fastq | cut -d ' ' -f 5`
-RIGHT_SIZE=`ls -l right_result.paired_trim.reverse_$COMMON_NAME.fastq | cut -d ' ' -f 5`
-if [ $LEFT_SIZE -lt 50 -o $RIGHT_SIZE -lt 50 ]; then
-    echo "Warning: trimmomatic output was 0 sequences"
-    touch $BASE_NAME-$COMMON_NAME-accepted_hits.bam
-    exit 0
+
+     java -Xmx512m \
+          -jar trimmomatic-0.36.jar PE -threads 1 -phred33 \
+          $BASE_NAME-forward-$COMMON_NAME $BASE_NAME-reverse-$COMMON_NAME \
+          left_result.paired_trim.forward_$COMMON_NAME.fastq left_result.unpaired_trim.forward_$COMMON_NAME.fastq \
+          right_result.paired_trim.reverse_$COMMON_NAME.fastq right_result.unpaired_trim.reverse_$COMMON_NAME.fastq \
+          ILLUMINACLIP:fasta_adapter.txt:2:40:15 LEADING:3 TRAILING:6 SLIDINGWINDOW:4:15 MINLEN:50 \
+          2>&1 | tee $BASE_NAME-$COMMON_NAME-trimmomatic.txt
+
+     # empty outputs?
+     LEFT_SIZE=`ls -l left_result.paired_trim.forward_$COMMON_NAME.fastq | cut -d ' ' -f 5`
+     RIGHT_SIZE=`ls -l right_result.paired_trim.reverse_$COMMON_NAME.fastq | cut -d ' ' -f 5`
+     if [ $LEFT_SIZE -lt 50 -o $RIGHT_SIZE -lt 50 ]; then
+         echo "Warning: trimmomatic output was 0 sequences"
+         touch $BASE_NAME-$COMMON_NAME-accepted_hits.bam
+         exit 0
+     fi
+
+     unzip hisat2-2.0.4-Linux_x86_64.zip
+
+     hisat2-2.0.4/hisat2 --no-temp-splicesite --known-splicesite-infile ./$REF_PREFIX.Splice_Sites.txt -x ./$REF_PREFIX -q -1 ./left_result.paired_trim.forward_$COMMON_NAME.fastq -2 ./right_result.paired_trim.reverse_$COMMON_NAME.fastq -S $BASE_NAME-$COMMON_NAME.hits.sam -t --dta-cufflinks 2>&1 | tee $BASE_NAME-$COMMON_NAME-out.txt
+
+
+elif [ $LAYOUT = "single" ] ; then
+
+    java -Xmx512m \
+         -jar trimmomatic-0.36.jar SE -threads 1 -phred33 \
+         $BASE_NAME-forward-$COMMON_NAME  \
+         left_result.paired_trim.forward_$COMMON_NAME.fastq \
+         ILLUMINACLIP:fasta_adapter.txt:2:40:15 LEADING:3 TRAILING:6 SLIDINGWINDOW:4:15 MINLEN:50 \
+         2>&1 | tee $BASE_NAME-$COMMON_NAME-trimmomatic.txt
+
+    # empty outputs?
+    LEFT_SIZE=`ls -l left_result.paired_trim.forward_$COMMON_NAME.fastq | cut -d ' ' -f 5`
+    if [ $LEFT_SIZE -o 50]; then
+        echo "Warning: trimmomatic output was 0 sequences"
+        touch $BASE_NAME-$COMMON_NAME-accepted_hits.bam
+        exit 0
+    fi
+
+    unzip hisat2-2.0.4-Linux_x86_64.zip
+
+    hisat2-2.0.4/hisat2 --no-temp-splicesite --known-splicesite-infile ./$REF_PREFIX.Splice_Sites.txt -x ./$REF_PREFIX -U left_result.paired_trim.forward_$COMMON_NAME.fastq -S $BASE_NAME-$COMMON_NAME.hits.sam -t --dta-cufflinks 2>&1 | tee $BASE_NAME-$COMMON_NAME-out.txt
 fi
-
-unzip hisat2-2.0.4-Linux_x86_64.zip
-
-hisat2-2.0.4/hisat2 --no-temp-splicesite --known-splicesite-infile ./$REF_PREFIX.Splice_Sites.txt -x ./$REF_PREFIX -q -1 ./left_result.paired_trim.forward_$COMMON_NAME.fastq -2 ./right_result.paired_trim.reverse_$COMMON_NAME.fastq -S $BASE_NAME-$COMMON_NAME.hits.sam -t --dta-cufflinks 2>&1 | tee $BASE_NAME-$COMMON_NAME-out.txt
-
 # we only need the accepted hits, but it needs a unique name
 mv $BASE_NAME-$COMMON_NAME.hits.sam $BASE_NAME-$COMMON_NAME-accepted_hits.sam
 
@@ -56,5 +82,4 @@ samtools view -bS $BASE_NAME-$COMMON_NAME-accepted_hits.sam > $BASE_NAME-$COMMON
 samtools sort -o $BASE_NAME-$COMMON_NAME-accepted_hits.view.sorted $BASE_NAME-$COMMON_NAME-accepted_hits.view
 
 mv $BASE_NAME-$COMMON_NAME-accepted_hits.view.sorted $BASE_NAME-$COMMON_NAME-accepted_hits.bam
-
 

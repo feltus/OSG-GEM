@@ -15,15 +15,27 @@ reference_prefix = chr21-GRCh38
 #
 #    input2 = DRR046893
 #
+# or a single fastq file for single end reads.  Example:
+#    input3 = SRR4343300.fastq.gz
 
 input1 = ./Test_data/TEST_1.fastq.gz ./Test_data/TEST_2.fastq.gz
+#input1 = ./Test_data/SRR4343300.fastq.gz
+#input2 = SRR4343300
 #input2 = DRR046893
 
+
 [config]
+
 
 # Memory available to the jobs. This should be roughly 2X the
 # size of the reference genome, rounded up whole GB
 memory = 4 GB
+
+# Reads are single end
+single = False
+
+# Reads are paired end
+paired = True
 
 # process using TopHat2
 tophat2 = False
@@ -36,4 +48,5 @@ cufflinks = False
 
 # process using StringTie
 stringtie = True
+
 

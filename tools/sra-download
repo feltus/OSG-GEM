@@ -10,16 +10,38 @@ set -e
 module load java/8u25
 module load sra/2.8.0
 
-SRA_ID=$1
-FORWARD=$2
-REVERSE=$3
+if [ "$#" -eq 4 ] ; then 
 
-fastq-dump --split-files --gzip $SRA_ID
+    SRA_ID=$1
+    FORWARD=$2
+    REVERSE=$3
+    LAYOUT=$4
+elif [ "$#" -eq 3 ] ; then
 
-mv ${SRA_ID}_1.fastq.gz $FORWARD
-mv ${SRA_ID}_2.fastq.gz $REVERSE
+    SRA_ID=$1
+    FORWARD=$2
+    LAYOUT=$3
+fi
 
-echo
-ls -lh
-echo
 
+if [ $LAYOUT = "paired" ] ; then
+
+    fastq-dump --split-files --gzip $SRA_ID
+
+    mv ${SRA_ID}_1.fastq.gz $FORWARD
+    mv ${SRA_ID}_2.fastq.gz $REVERSE
+
+    echo
+    ls -lh
+    echo
+
+elif [ $LAYOUT = "single" ] ; then
+    
+    fastq-dump --gzip $SRA_ID
+
+    mv ${SRA_ID}.fastq.gz $FORWARD
+
+    echo
+    ls -lh
+    echo
+fi

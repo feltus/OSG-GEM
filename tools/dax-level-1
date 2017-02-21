@@ -38,6 +38,12 @@ if not conf.getboolean("config", "stringtie") and not conf.getboolean("config", 
 if conf.getboolean("config", "stringtie") and conf.getboolean("config", "cufflinks"):
     print("Please enable only one of stringtie and cufflinks in the config file")
     sys.exit(1)
+if conf.getboolean("config", "paired") and conf.getboolean("config", "single"):
+    print("Please enable only paired OR single end reads")
+    sys.exit(1)
+if not conf.getboolean("config", "paired") and not conf.getboolean("config", "single"):
+    print("Please enable either single or paired end reads")
+    sys.exit(1)
 
 # making sure the user specified a reference set
 print("\nAdding reference files ...")
@@ -81,56 +87,102 @@ print(" ")
 
 prepare_jobs = []
 input_id = 0
-for key, inputs in conf.items("inputs"):
-    input_id += 1
 
-    inputs = inputs.strip()
+if conf.getboolean("config", "paired"):
 
-    print("Found input: " + inputs)
+    for key, inputs in conf.items("inputs"):
+        input_id += 1
 
-    # can either be from the filesystem, remote url, or from a SRA download job
-    forward_file = File("forward-" + str(input_id))
-    reverse_file = File("reverse-" + str(input_id))
+        inputs = inputs.strip()
 
-    dax.addFile(forward_file)
-    dax.addFile(reverse_file)
+        print("Found input: " + inputs)
 
-    urls = inputs.split(" ")
-    if len(urls) == 2:
-        # user gave use forward/reverse files to use
-        # are the URLs local?
-        if not re.search(":", urls[0]):
-            urls[0] = "file://" + os.path.abspath(urls[0])
-        if not re.search(":", urls[1]):
-            urls[1] = "file://" + os.path.abspath(urls[1])
+        # can either be from the filesystem, remote url, or from a SRA download job
+        forward_file = File("forward-" + str(input_id))
+        reverse_file = File("reverse-" + str(input_id))
 
-        forward_file.addPFN(PFN(urls[0], "local"))
-        reverse_file.addPFN(PFN(urls[1], "local"))
-    else:
-        # SRA input, we need a job first do download and split the data
-        dl = Job(name="sra-download")
-        dl.uses(forward_file, link=Link.OUTPUT, transfer=False)
-        dl.uses(reverse_file, link=Link.OUTPUT, transfer=False)
-        dl.addArguments(inputs, forward_file, reverse_file)
-        #dl.addProfile(Profile("hints", "execution.site", "local"))
-        dl.addProfile(Profile("dagman", "CATEGORY", "sradownload"))
-        dax.addJob(dl)
+        dax.addFile(forward_file)
+        dax.addFile(reverse_file)
+
+        urls = inputs.split(" ")
+        if len(urls) == 2:
+            # user gave use forward/reverse files to use
+            # are the URLs local?
+            if not re.search(":", urls[0]):
+                urls[0] = "file://" + os.path.abspath(urls[0])
+            if not re.search(":", urls[1]):
+                urls[1] = "file://" + os.path.abspath(urls[1])
+
+            forward_file.addPFN(PFN(urls[0], "local"))
+            reverse_file.addPFN(PFN(urls[1], "local"))
+        else:
+            # SRA input, we need a job first do download and split the data
+            dl = Job(name="sra-download")
+            dl.uses(forward_file, link=Link.OUTPUT, transfer=False)
+            dl.uses(reverse_file, link=Link.OUTPUT, transfer=False)
+            dl.addArguments(inputs, forward_file, reverse_file, "paired")
+            #dl.addProfile(Profile("hints", "execution.site", "local"))
+            dl.addProfile(Profile("dagman", "CATEGORY", "sradownload"))
+            dax.addJob(dl)
     
-    # set up split jobs
-    split1 = Job(name="prepare-inputs")
-    split1.uses(forward_file, link=Link.INPUT)
-    split1.addArguments(base_dir, forward_file, data_dir + "/" + str(input_id), str(input_id) + "-forward")
-    split1.addProfile(Profile("hints", "execution.site", "local"))
-    dax.addJob(split1)
+        # set up split jobs
+        split1 = Job(name="prepare-inputs")
+        split1.uses(forward_file, link=Link.INPUT)
+        split1.addArguments(base_dir, forward_file, data_dir + "/" + str(input_id), str(input_id) + "-forward")
+        split1.addProfile(Profile("hints", "execution.site", "local"))
+        dax.addJob(split1)
     
-    split2 = Job(name="prepare-inputs")
-    split2.uses(reverse_file, link=Link.INPUT)
-    split2.addArguments(base_dir, reverse_file , data_dir + "/" + str(input_id), str(input_id) + "-reverse")
-    split2.addProfile(Profile("hints", "execution.site", "local"))
-    dax.addJob(split2)
+        split2 = Job(name="prepare-inputs")
+        split2.uses(reverse_file, link=Link.INPUT)
+        split2.addArguments(base_dir, reverse_file , data_dir + "/" + str(input_id), str(input_id) + "-reverse")
+        split2.addProfile(Profile("hints", "execution.site", "local"))
+        dax.addJob(split2)
 
-    prepare_jobs.append(split1)
-    prepare_jobs.append(split2)
+        prepare_jobs.append(split1)
+        prepare_jobs.append(split2)
+
+
+elif conf.getboolean("config", "single"):
+
+    for key, inputs in conf.items("inputs"):
+        input_id += 1
+
+        inputs = inputs.strip()
+
+        print("Found input: " + inputs)
+
+        # can either be from the filesystem, remote url, or from a SRA download job
+        forward_file = File("forward-" + str(input_id))
+
+        dax.addFile(forward_file)
+
+        urls = inputs.split(" ")
+        if len(urls) == 1 and "fastq" in str(urls):
+            # user gave use forward/reverse files to use
+            # are the URLs local?
+            if not re.search(":", urls[0]):
+                urls[0] = "file://" + os.path.abspath(urls[0])
+
+            forward_file.addPFN(PFN(urls[0], "local"))
+        else:
+            # SRA input, we need a job first do download and split the data
+            dl = Job(name="sra-download")
+            dl.uses(forward_file, link=Link.OUTPUT, transfer=False)
+            dl.addArguments(inputs, forward_file, "single")
+            #dl.addProfile(Profile("hints", "execution.site", "local"))
+            dl.addProfile(Profile("dagman", "CATEGORY", "sradownload"))
+            dax.addJob(dl)
+
+        # set up split jobs
+        split1 = Job(name="prepare-inputs")
+        split1.uses(forward_file, link=Link.INPUT)
+        split1.addArguments(base_dir, forward_file, data_dir + "/" + str(input_id), str(input_id) + "-forward")
+        split1.addProfile(Profile("hints", "execution.site", "local"))
+        dax.addJob(split1)
+
+
+        prepare_jobs.append(split1)
+
     
 # generate sub workflow
 j2 = Job(name="dax-level-2")
