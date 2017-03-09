@@ -38,7 +38,7 @@ if [ $COUNT = 0 ]; then
     exit 0
 fi
 
-stringtie *.bam -G $GFF3 -e -B -o out.gtf
+stringtie *.bam -G $GFF3 -e -B  > /dev/null
 
 python ST_ttab_parse.py t_data.ctab > $BASE_NAME-merged_counts.fpkm
 

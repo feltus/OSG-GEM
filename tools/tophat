@@ -33,8 +33,8 @@ if [ $LAYOUT = "paired" ] ; then
     java -Xmx512m \
          -jar trimmomatic-0.36.jar PE -threads 1 -phred33 \
          $BASE_NAME-forward-$COMMON_NAME $BASE_NAME-reverse-$COMMON_NAME \
-         left_result.paired_trim.forward_$COMMON_NAME.fastq left_result.unpaired_trim.forward_$COMMON_NAME.fastq \
-         right_result.paired_trim.reverse_$COMMON_NAME.fastq right_result.unpaired_trim.reverse_$COMMON_NAME.fastq \
+         left_result.paired_trim.forward_$COMMON_NAME.fastq /dev/null \
+         right_result.paired_trim.reverse_$COMMON_NAME.fastq /dev/null \
          ILLUMINACLIP:fasta_adapter.txt:2:40:15 LEADING:3 TRAILING:6 SLIDINGWINDOW:4:15 MINLEN:50 \
          2>&1 | tee $BASE_NAME-$COMMON_NAME-trimmomatic.txt
 
