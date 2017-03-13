@@ -9,7 +9,7 @@ if [ -e /stash2 ]; then
     module load xrootd
     module load stashcp
     
-    export PATH=/home/rynge/software/pegasus-4.7.0dev/bin:$PATH
+    module load pegasus
     
     TOPDIR=`pwd`
     
