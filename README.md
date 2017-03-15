@@ -77,21 +77,21 @@ file and gene annotation in GTF/GFF3 format, the following commands can be used 
 
 ### If the user would like to use Hisat2:
 
-####Index the reference genome
+#### Index the reference genome
 
        $ hisat2-build -f GRCh38.fa GRCh38
 
-####Generate Tab delimited list of splice sites using gene model GTF file as input (Python DefaultDictionary Module necessary)
+#### Generate Tab delimited list of splice sites using gene model GTF file as input (Python DefaultDictionary Module necessary)
 
        $ python hisat2_extract_splice_sites.py GRCh38-gencode.v24.annotation.gtf > GRCh38.Splice_Sites.txt
 
 ### If the user would like to use Tophat2:
 
-####Index the reference genome
+#### Index the reference genome
 
        $ bowtie2-build GRCh38.fa GRCh38
 
-####Generate and Index Reference Transcriptome
+#### Generate and Index Reference Transcriptome
 
        $ tophat2 -G GRCh38.gencode.v24.annotation.gff3 --transcriptome-index=transcriptome_data/GRCh38 GRCh38
        $ tar czf GRCh38.transcriptome_data.tar.gz transcriptome_data/
@@ -105,7 +105,7 @@ Once the user has obtained necessary input files, the _osg-gem.config_ file must
 
 ### Place Files in _reference_ directory
 
-####If the user would like to use Hisat2, the following files must be present in the _reference_ directory:
+#### If the user would like to use Hisat2, the following files must be present in the _reference_ directory:
 $REF_PREFIX.fa
 
 $REF_PREFIX.1.ht2 … $REF_PREFIX.N.ht2
@@ -114,7 +114,7 @@ $REF_PREFIX.Splice_Sites.txt
 
 $REF_PREFIX.gff3
 
-####If the user would like to use Tophat2, the following files must be present in the _reference_ directory:
+#### If the user would like to use Tophat2, the following files must be present in the _reference_ directory:
 
 $REF_PREFIX.fa
 
@@ -249,25 +249,25 @@ To customize OSG-GEM parameters, basic understanding of the directory structure 
 
 ### Workflow Directory Structure
 
-####Test_data
+#### Test_data
 
 This contains small FASTQ files for testing.  The user may place their own data in this directory or elsehwere on the OSG filesystems.  
 
-####reference
+#### reference
 
 Contains all reference genome and annotation files, as described previously.
 
-####Tools
+#### Tools
 
 This directory contains job wrappers for each step of the workflow.  It is suggested that the user becomes familiar with the parameters set for each software to determine if they would like to make changes.  If the user would like to change software parameters, they may modify the commands in the files here.  Note that any changes to input filenames in the commands must match the files that are catalogued in the _task-files_ directory (explained below)
 
-####task-files
+#### task-files
 
 This directory contains subdirectories for each job that utilizes specific files(eg., python script to parse StringTie output, fasta_adapters.txt file for trimmomatic).
 
 Any files placed in these directories will be transferred to OSG compute nodes for the corresponding jobs.  For example, if the user would like to use a different fasta adapters file 'NewAdapters.txt' for read trimming for the hisat2 job, they would copy this file to the _hisat2_ directory.  Note that the job wrapper in the _tools_ directory must now be modified to match this filename.  
 
-####useful_files
+#### useful_files
 
 Contains files that may be useful to users of this workflow.  Currently holds the hisat2_extract_splice_sites.py script that comes with the Hisat2 software package.  This script can be used to generate a tab delimited list of splice sites from a GTF gene model file.  
 
@@ -305,7 +305,7 @@ to request only 3 gigabytes of RAM per job:
 
         <profile namespace="condor" key="request_memory" >3 GB</profile>
         
-###Interchanging Software
+### Interchanging Software
 
 This workflow utilizes OASIS software modules that OSG compute nodes can access.  Job wrappers in this workflow load these modules to utilize specific versions of software.  For example, the following software modules are loaded for all _tophat_ jobs using the 'module load' command:
 
