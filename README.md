@@ -2,7 +2,7 @@
 # OSG-GEM
 OSG-GEM is a Pegasus workflow that utilizes Open Science Grid (OSG) resources to produce a Gene Expression Matrix (GEM) from DNA sequence files in FASTQ format. The workflow is also configured to run on Jetstream 
 
-##Citation
+### Citation
 
 William L. Poehlman, Mats Rynge, Chris Branton, D. Balamurugan and Frank A. Feltus. OSG-GEM: Gene Expression Matrix Construction Using the Open Science Grid. *Bioinformatics and Biology Insights* 2016:10 133–141 doi:  10.4137/BBI.S38193.
 
