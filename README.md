@@ -3,6 +3,7 @@
 OSG-GEM is a Pegasus workflow that utilizes Open Science Grid (OSG) resources to produce a Gene Expression Matrix (GEM) from DNA sequence files in FASTQ format. The workflow is also configured to run on Jetstream 
 
 ##Citation
+
 William L. Poehlman, Mats Rynge, Chris Branton, D. Balamurugan and Frank A. Feltus. OSG-GEM: Gene Expression Matrix Construction Using the Open Science Grid. *Bioinformatics and Biology Insights* 2016:10 133–141 doi:  10.4137/BBI.S38193.
 
 ## Introduction
@@ -56,7 +57,7 @@ If that works, log out from the new session. You are now ready to submit workflo
 ## Example Workflow Setup
 
 The worklow cloned from github contains an example config file as well as example input files from the 21st chromosome of Gencode Release 24 of the GRCh38 build of the human reference genome.  Two small FASTQ files containing
-200,000 sequences from NCBI dataset SRR1825962 lie within the _Test_data_ directory of the workflow.  The example osg-gem.conf file also downloads the first 10,000 sequences of DRR046893 as an input dataset.  To run the test workflow, the user must copy the _osg-gem.config.template_ file:
+200,000 sequences from NCBI dataset SRR1825962 lie within the _Test_data_ directory of the workflow.  To run the test workflow, the user must copy the _osg-gem.config.template_ file:
 
         $ cp osg-gem.conf.template osg-gem.conf
 
@@ -64,7 +65,7 @@ The workflow, configured to run Hisat2 and Stringtie, can then be launched by ru
 
         $ ./submit
 
-From here, the user may follow our documentation to modify the software options as well as point to their own input dataset.
+From here, the user may follow our documentation to modify the software options as well as point to their own input datasets.
 
 
 
