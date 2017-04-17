@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # module init required when running on non-OSG resources, and has to sourced
-# before set -e as sometimes it exits non-0 when a module environment is 
+# before set -e as sometimes it exits non-0 when a module environment is
 # already set up
 . /cvmfs/oasis.opensciencegrid.org/osg/sw/module-init.sh
 
@@ -42,3 +42,4 @@ stringtie *.bam -G $GFF3 -e -B  > /dev/null
 
 python ST_ttab_parse.py t_data.ctab > $BASE_NAME-merged_counts.fpkm
 
+mv t_data.ctab $BASE_NAME-t_data.ctab

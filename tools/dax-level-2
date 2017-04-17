@@ -118,9 +118,9 @@ if conf.getboolean("config", "paired"):
         #j.uses(f2, link=Link.OUTPUT, transfer=True)
         f3 = File(base_name + "-" + common_part + "-out.txt")
         log_files.append(f3)
-        j.uses(f3, link=Link.OUTPUT, transfer=True)
+        j.uses(f3, link=Link.OUTPUT, transfer=False)
         f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
-        j.uses(f4, link=Link.OUTPUT, transfer=True)
+        j.uses(f4, link=Link.OUTPUT, transfer=False)
         log_files.append(f4)
         dax.addJob(j)
 
@@ -144,10 +144,10 @@ if conf.getboolean("config", "paired"):
         f1 = File(base_name + "-" + common_part + "-accepted_hits.bam")
         j.uses(f1, link=Link.OUTPUT, transfer=False)
         f2 = File(base_name + "-" + common_part + "-align_summary.txt")
-        j.uses(f2, link=Link.OUTPUT, transfer=True)
+        j.uses(f2, link=Link.OUTPUT, transfer=False)
         log_files.append(f2)
         f3 = File(base_name + "-" + common_part + "-out.txt")
-        j.uses(f3, link=Link.OUTPUT, transfer=True)
+        j.uses(f3, link=Link.OUTPUT, transfer=False)
         f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
         j.uses(f4, link=Link.OUTPUT, transfer=True)
         log_files.append(f4)
@@ -178,10 +178,10 @@ elif conf.getboolean("config", "single"):
         #j.uses(f2, link=Link.OUTPUT, transfer=True)
         f3 = File(base_name + "-" + common_part + "-out.txt")
         log_files.append(f3)
-        j.uses(f3, link=Link.OUTPUT, transfer=True)
+        j.uses(f3, link=Link.OUTPUT, transfer=False)
         f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
         log_files.append(f4)
-        j.uses(f4, link=Link.OUTPUT, transfer=True)
+        j.uses(f4, link=Link.OUTPUT, transfer=False)
         dax.addJob(j)
 
         return f1
@@ -204,12 +204,12 @@ elif conf.getboolean("config", "single"):
         j.uses(f1, link=Link.OUTPUT, transfer=False)
         f2 = File(base_name + "-" + common_part + "-align_summary.txt")
         log_files.append(f2)
-        j.uses(f2, link=Link.OUTPUT, transfer=True)
+        j.uses(f2, link=Link.OUTPUT, transfer=False)
         f3 = File(base_name + "-" + common_part + "-out.txt")
-        j.uses(f3, link=Link.OUTPUT, transfer=True)
+        j.uses(f3, link=Link.OUTPUT, transfer=False)
         f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
         log_files.append(f4)
-        j.uses(f4, link=Link.OUTPUT, transfer=True)
+        j.uses(f4, link=Link.OUTPUT, transfer=False)
         dax.addJob(j)
 
         return f1
@@ -272,7 +272,10 @@ def stringtie(task_files, dax, base_name, merged):
     # outputs
     f = File(base_name + "-merged_counts.fpkm")
     fpkm_files.append(f)
+    t = File(base_name + "-t_data.ctab")
+
     j.uses(f, link=Link.OUTPUT, transfer=True)
+    j.uses(t, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
 
     return f
