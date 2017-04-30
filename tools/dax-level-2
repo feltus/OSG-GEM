@@ -273,7 +273,10 @@ def stringtie(task_files, dax, base_name, merged):
     f = File(base_name + "-merged_counts.fpkm")
     fpkm_files.append(f)
     t = File(base_name + "-t_data.ctab")
-
+    e = File(base_name + "-e_data.ctab")
+    i = File(base_name + "-i_data.ctab")
+    j.uses(e, link=Link.OUTPUT, transfer=True)
+    j.uses(i, link=Link.OUTPUT, transfer=True)
     j.uses(f, link=Link.OUTPUT, transfer=True)
     j.uses(t, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
