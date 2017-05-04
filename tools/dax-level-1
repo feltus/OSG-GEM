@@ -26,11 +26,20 @@ if len(r) != 1:
     sys.exit(1)
 
 # validate the settings in the config file
-if not conf.getboolean("config", "hisat2") and not conf.getboolean("config", "tophat2"):
-    print("Please enable either hisat2 or tophat2 in the config file")
+if not conf.getboolean("config", "hisat2") and not conf.getboolean("config", "tophat2") and not conf.getboolean("config", "star"):
+    print("Please enable either hisat2 or tophat2 or star in the config file")
     sys.exit(1)
-if conf.getboolean("config", "hisat2") and conf.getboolean("config", "tophat2"):
+if conf.getboolean("config", "hisat2") and conf.getboolean("config", "tophat2") and conf.getboolean("config", "star"):
+    print("Please enable only one of hisat2 or tophat2 or star in the config file")
+    sys.exit(1)
+if conf.getboolean("config", "hisat2") and conf.getboolean("config", "tophat2") and not conf.getboolean("config", "star"):
     print("Please enable only one of hisat2 and tophat2 in the config file")
+    sys.exit(1)
+if conf.getboolean("config", "hisat2") and not conf.getboolean("config", "tophat2") and conf.getboolean("config", "star"):
+    print("Please enable only one of hisat2 and star in the config file")
+    sys.exit(1)
+if not conf.getboolean("config", "hisat2") and conf.getboolean("config", "tophat2") and conf.getboolean("config", "star"):
+    print("Please enable only one of tophat2 and star in the config file")
     sys.exit(1)
 if not conf.getboolean("config", "stringtie") and not conf.getboolean("config", "cufflinks"):
     print("Please enable either stringtie or cufflinks in the config file")
@@ -38,20 +47,19 @@ if not conf.getboolean("config", "stringtie") and not conf.getboolean("config", 
 if conf.getboolean("config", "stringtie") and conf.getboolean("config", "cufflinks"):
     print("Please enable only one of stringtie and cufflinks in the config file")
     sys.exit(1)
-if conf.getboolean("config", "paired") and conf.getboolean("config", "single"):
-    print("Please enable only paired OR single end reads")
-    sys.exit(1)
-if not conf.getboolean("config", "paired") and not conf.getboolean("config", "single"):
-    print("Please enable either single or paired end reads")
-    sys.exit(1)
 
 # making sure the user specified a reference set
 print("\nAdding reference files ...")
 count = 0
-for fname in os.listdir(base_dir + "/reference/"):
-    if re.search("^" + conf.get("reference", "reference_prefix"), fname):
-        print("    " + fname)
-        count += 1
+
+for fname in os.listdir(base_dir + "/reference/star_index/"):
+#    if re.search("^" + conf.get("reference", "reference_prefix"), fname):
+#        print("    " + fname)
+#        count += 1
+#    if re.search("^" + conf.get("reference","reference_path"), fname):
+	print("    " + fname)
+	count += 1
+
 if count == 0:
     print("ERROR: Unable to find reference files in the reference/ directory" +
           " with the specified prefix: " + conf.get("reference", "reference_prefix"))
@@ -124,14 +132,14 @@ if conf.getboolean("config", "paired"):
             #dl.addProfile(Profile("hints", "execution.site", "local"))
             dl.addProfile(Profile("dagman", "CATEGORY", "sradownload"))
             dax.addJob(dl)
-    
+
         # set up split jobs
         split1 = Job(name="prepare-inputs")
         split1.uses(forward_file, link=Link.INPUT)
         split1.addArguments(base_dir, forward_file, data_dir + "/" + str(input_id), str(input_id) + "-forward")
         split1.addProfile(Profile("hints", "execution.site", "local"))
         dax.addJob(split1)
-    
+
         split2 = Job(name="prepare-inputs")
         split2.uses(reverse_file, link=Link.INPUT)
         split2.addArguments(base_dir, reverse_file , data_dir + "/" + str(input_id), str(input_id) + "-reverse")
@@ -182,7 +190,6 @@ elif conf.getboolean("config", "single"):
 
 
         prepare_jobs.append(split1)
-
     
 # generate sub workflow
 j2 = Job(name="dax-level-2")

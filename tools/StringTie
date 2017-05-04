@@ -45,3 +45,4 @@ python ST_ttab_parse.py t_data.ctab > $BASE_NAME-merged_counts.fpkm
 mv t_data.ctab $BASE_NAME-t_data.ctab
 mv e_data.ctab $BASE_NAME-e_data.ctab
 mv i_data.ctab $BASE_NAME-i_data.ctab
+

@@ -43,6 +43,9 @@ tophat2 = False
 # process using Hisat2
 hisat2 = True
 
+# process using STAR
+star = False
+
 # process using Cufflinks
 cufflinks = False
 

@@ -65,7 +65,7 @@ The workflow, configured to run Hisat2 and Stringtie, can then be launched by ru
 
         $ ./submit
 
-From here, the user may follow our documentation to modify the software options as well as point to their own input datasets.
+From here, the user may follow our documentation to modify the software options as well as point to their own input datasets.  Note that there are no test reference genome indices available for STAR, because they are too large to upload to github.  
 
 
 
@@ -96,8 +96,15 @@ file and gene annotation in GTF/GFF3 format, the following commands can be used 
        $ tophat2 -G GRCh38.gencode.v24.annotation.gff3 --transcriptome-index=transcriptome_data/GRCh38 GRCh38
        $ tar czf GRCh38.transcriptome_data.tar.gz transcriptome_data/
        
+### If the user would like to use STAR:
+       # cd into the "star_index" directory within "reference".  Place all genome files here  
 
+       $ cd reference/star_index
+       $ STAR-2.5.2b/bin/Linux_x86_64_static/STAR --runMode genomeGenerate --runThreadN 4 --genomeDir ./ --genomeFastaFiles ./GRCh38.fa --sjdbGTFfile ./GRCh38.gencode.v24.annotation.gff3 
 
+#### Generate Tab delimited list of splice sites using gene model GTF file as input (Python DefaultDictionary Module necessary)
+
+       $ python hisat2_extract_splice_sites.py GRCh38-gencode.v24.annotation.gtf > GRCh38.Splice_Sites.txt
 
 
 ## Workflow Configuration
@@ -127,6 +134,19 @@ $REF_PREFIX.rev.2.bt2
 $REF_PREFIX.transcriptome_data.tar.gz
 
 $REF_PREFIX.gff3
+
+#### If the user would like to use, STAR, the following files must be present in the _reference/star_index_ directory:
+
+chrLength.txt
+chrNameLength.txt
+chrName.txt
+chrStart.txt
+Genome
+genomeParameters.txt
+Log.out
+SA
+SAindex
+*Splice_Sites.txt
 
 ### User Input Datasets
 

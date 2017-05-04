@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# module init required when running on non-OSG resources, and has to sourced
+# before set -e as sometimes it exits non-0 when a module environment is
+# already set up
+. /cvmfs/oasis.opensciencegrid.org/osg/sw/module-init.sh
+
+set -e
+
+module load samtools/1.3.1
+module load java/8u25
+
+set -v
+set -o pipefail
+
+CONNECT_USER=$1
+RUN_ID=$2
+REF_PATH=$3
+BASE_NAME=$4
+PART=$5
+COMMON_NAME=$6
+LAYOUT=$7
+
+unzip 2.5.2b.zip
+
+if [ $LAYOUT = "paired" ] ; then
+
+
+     java -Xmx512m \
+          -jar trimmomatic-0.36.jar PE -threads 1 -phred33 \
+          $BASE_NAME-forward-$COMMON_NAME $BASE_NAME-reverse-$COMMON_NAME \
+          left_result.paired_trim.forward_$COMMON_NAME.fastq /dev/null \
+          right_result.paired_trim.reverse_$COMMON_NAME.fastq /dev/null \
+          ILLUMINACLIP:fasta_adapter.txt:2:40:15 LEADING:3 TRAILING:6 SLIDINGWINDOW:4:15 MINLEN:50 \
+          2>&1 | tee $BASE_NAME-$COMMON_NAME-trimmomatic.txt
+
+     # empty outputs?
+     LEFT_SIZE=`ls -l left_result.paired_trim.forward_$COMMON_NAME.fastq | cut -d ' ' -f 5`
+     RIGHT_SIZE=`ls -l right_result.paired_trim.reverse_$COMMON_NAME.fastq | cut -d ' ' -f 5`
+     if [ $LEFT_SIZE -lt 50 -o $RIGHT_SIZE -lt 50 ]; then
+         echo "Warning: trimmomatic output was 0 sequences"
+         touch $BASE_NAME-$COMMON_NAME-accepted_hits.bam
+         exit 0
+     fi
+
+
+     STAR-2.5.2b/bin/Linux_x86_64_static/STAR --genomeDir . --sjdbFileChrStartEnd ./*.Splice_Sites.txt --runThreadN 1 \
+                                         --outSAMtype BAM SortedByCoordinate \
+                                         --readFilesIn left_result.paired_trim.forward_$COMMON_NAME.fastq right_result.paired_trim.reverse_$COMMON_NAME.fastq  | tee $BASE_NAME-$COMMON_NAME-out.txt
+
+elif [ $LAYOUT = "single" ] ; then
+
+
+    java -Xmx512m \
+         -jar trimmomatic-0.36.jar SE -threads 1 -phred33 \
+         $BASE_NAME-forward-$COMMON_NAME  \
+         left_result.paired_trim.forward_$COMMON_NAME.fastq \
+         ILLUMINACLIP:fasta_adapter.txt:2:40:15 LEADING:3 TRAILING:6 SLIDINGWINDOW:4:15 MINLEN:50 \
+         2>&1 | tee $BASE_NAME-$COMMON_NAME-trimmomatic.txt
+
+    # empty outputs?
+    LEFT_SIZE=`ls -l left_result.paired_trim.forward_$COMMON_NAME.fastq | cut -d ' ' -f 5`
+    if [ $LEFT_SIZE -lt 50 ] ; then
+        echo "Warning: trimmomatic output was 0 sequences"
+        touch $BASE_NAME-$COMMON_NAME-accepted_hits.bam
+        exit 0
+    fi
+
+
+    STAR-2.5.2b/bin/Linux_x86_64_static/STAR --genomeDir . --sjdbFileChrStartEnd ./*.Splice_Sites.txt --runThreadN 1 \
+                                         --outSAMtype BAM SortedByCoordinate \
+                                         --readFilesIn left_result.paired_trim.forward_$COMMON_NAME.fastq | tee $BASE_NAME-$COMMON_NAME-out.txt
+fi
+
+mv Aligned.sortedByCoord.out.bam $BASE_NAME-$COMMON_NAME-accepted_hits.bam
+
+mv Log.final.out $BASE_NAME-$COMMON_NAME-Log.final.out

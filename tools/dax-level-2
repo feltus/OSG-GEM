@@ -55,21 +55,38 @@ def add_ref_files(dax, job, ref_prefix):
     """
     add a set of reference input files
     """
-    global ref_files
-    if ref_prefix not in ref_files:
-        ref_files[ref_prefix] = {}
-    # add to DAX-level replica catalog
-    for fname in os.listdir(base_dir + "/reference/"):
-        if (not re.search("^" + ref_prefix, fname)) or (re.search("\.gff3$", fname)):
-            # skip non-matching files
-            continue
-        if fname not in ref_files[ref_prefix]:
-            ref_files[ref_prefix][fname] = File(fname)
-            ref_files[ref_prefix][fname].addPFN( \
-                PFN("file://" + base_dir + "/reference/" + fname, "local"))
-            dax.addFile(ref_files[ref_prefix][fname])
-    for f in ref_files[ref_prefix]:
-        job.uses(f, link=Link.INPUT)
+
+
+    if conf.getboolean("config", "star"):
+        global ref_files
+        # add to DAX-level replica catalog
+        for fname in os.listdir(base_dir + "/reference/star_index/"):
+            if fname not in ref_files:
+                ref_files[fname] = File(fname)
+                ref_files[fname].addPFN( \
+                    PFN("file://" + base_dir + "/reference/star_index/" + fname, "local"))
+                dax.addFile(ref_files[fname])
+        for f in ref_files:
+            job.uses(f, link=Link.INPUT)
+
+
+    else:
+        global ref_files
+        if ref_prefix not in ref_files:
+            ref_files[ref_prefix] = {}
+        # add to DAX-level replica catalog
+        for fname in os.listdir(base_dir + "/reference/"):
+            if (not re.search("^" + ref_prefix, fname)) or (re.search("\.gff3$", fname)): 
+                # skip non-matching files
+                continue
+            if fname not in ref_files[ref_prefix]:
+                ref_files[ref_prefix][fname] = File(fname)
+                ref_files[ref_prefix][fname].addPFN( \
+                    PFN("file://" + base_dir + "/reference/" + fname, "local"))
+                dax.addFile(ref_files[ref_prefix][fname])
+        for f in ref_files[ref_prefix]:
+            job.uses(f, link=Link.INPUT)
+
 
 
 def add_gff3_file(dax, job):
@@ -154,9 +171,40 @@ if conf.getboolean("config", "paired"):
         dax.addJob(j)
 
         return f1
+        
+
+    def star(task_files, dax, base_name, part, common_part, forward_file, reverse_file):
+        # Add job
+        j = Job(name="star")
+        j.addArguments(getpass.getuser(), \
+                       run_id, \
+                       conf.get("reference", "reference_prefix"), \
+                       base_name, \
+                       part, \
+                       common_part, "paired")
+        add_task_files(task_files, dax, j, "star")
+        add_ref_files(dax, j, conf.get("reference", "reference_prefix"))
+        j.uses(forward_file, link=Link.INPUT)
+        j.uses(reverse_file, link=Link.INPUT)
+        # output files
+        f1 = File(base_name + "-" + common_part + "-accepted_hits.bam")
+        j.uses(f1, link=Link.OUTPUT, transfer=False)
+        f3 = File(base_name + "-" + common_part + "-out.txt")
+        log_files.append(f3)
+        l = File(base_name + "-" + common_part + "-Log.final.out")
+        j.uses(l, link=Link.OUTPUT, transfer=False)
+        log_files.append(l)
+        j.uses(f3, link=Link.OUTPUT, transfer=False)
+        f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
+        j.uses(f4, link=Link.OUTPUT, transfer=False)
+        log_files.append(f4)
+        dax.addJob(j)
+
+        return f1
+
 
 elif conf.getboolean("config", "single"):
- 
+
 
     def hisat2(task_files, dax, base_name, part, common_part, forward_file):
 
@@ -213,6 +261,36 @@ elif conf.getboolean("config", "single"):
         dax.addJob(j)
 
         return f1
+        
+
+    def star(task_files, dax, base_name, part, common_part, forward_file):
+        # Add job
+        j = Job(name="star")
+        j.addArguments(getpass.getuser(), \
+                       run_id, \
+                       conf.get("reference", "reference_prefix"), \
+                       base_name, \
+                       part, \
+                       common_part, "single")
+        add_task_files(task_files, dax, j, "star")
+        add_ref_files(dax, j, conf.get("reference", "reference_prefix"))
+        j.uses(forward_file, link=Link.INPUT)
+        # output files
+        f1 = File(base_name + "-" + common_part + "-accepted_hits.bam")
+        j.uses(f1, link=Link.OUTPUT, transfer=False)
+        f3 = File(base_name + "-" + common_part + "-out.txt")
+        log_files.append(f3)
+        j.uses(f3, link=Link.OUTPUT, transfer=False)
+        l = File(base_name + "-" + common_part + "-Log.final.out")
+        j.uses(l, link=Link.OUTPUT, transfer=False)
+        log_files.append(l)
+        f4 = File(base_name + "-" + common_part + "-trimmomatic.txt")
+        log_files.append(f4)
+        j.uses(f4, link=Link.OUTPUT, transfer=False)
+        dax.addJob(j)
+
+        return f1
+
 
 def merge(dax, base_name, in_list):
 
@@ -233,7 +311,7 @@ def merge(dax, base_name, in_list):
 
 
 def cuff(task_files, dax, base_name, merged):
-    
+
     global fpkm_files
 
     # Add job
@@ -256,7 +334,7 @@ def cuff(task_files, dax, base_name, merged):
 
 
 def stringtie(task_files, dax, base_name, merged):
-    
+
     global fpkm_files
 
     # Add job
@@ -315,18 +393,18 @@ def main():
     for base_name in os.listdir(data_dir):
 
         parts = []
-        
+
         for part in os.listdir(data_dir + "/" + base_name):
 
             my_data_dir = run_dir + "/data/" + base_name + "/" + part
-        
+
             accepted_hits = []
             for in_name in os.listdir(my_data_dir):
-        
+
                 # only need the forward file
                 if not "forward" in in_name:
                     continue
-        
+
                 # use stash urls for the data so we can bypass and grab it directly from
                 # the jobs (OSG Connect uses stash)
                 if os.path.exists("/stash2"):
@@ -336,40 +414,46 @@ def main():
                 else:
                     base_url = "file://" + run_dir + "/data/" + base_name + "/" + part
                     site_name = "local"
-        
+
                 common_part = in_name
                 common_part = re.sub(".*-forward\-", "", common_part)
                 common_part = re.sub("\.gz", "", common_part)
-                
+
                 for_file = File(base_name + "-forward-" + common_part)
                 for_file.addPFN(PFN(base_url + "/" + base_name + "-forward-" + common_part, site_name))
                 dax.addFile(for_file)
-                
+
                 if conf.getboolean("config", "paired"):
                     rev_file = File(base_name + "-reverse-" + common_part)
                     rev_file.addPFN(PFN(base_url + "/" + base_name + "-reverse-" + common_part, site_name))
                     dax.addFile(rev_file)
-           
+
                 if conf.getboolean("config", "hisat2") and conf.getboolean("config", "paired"):
                     out_file = hisat2(task_files, dax, base_name, part, common_part, for_file, rev_file)
-                
+
                 elif conf.getboolean("config", "hisat2") and conf.getboolean("config", "single"):
                     out_file = hisat2(task_files, dax, base_name, part, common_part, for_file)
 
                 elif conf.getboolean("config", "tophat2") and conf.getboolean("config", "paired"):
                     out_file = tophat(task_files, dax, base_name, part, common_part, for_file, rev_file)
-                
+
                 elif conf.getboolean("config", "tophat2") and conf.getboolean("config", "single"):
                     out_file = tophat(task_files, dax, base_name, part, common_part, for_file)
-   
+                
+                elif conf.getboolean("config", "star") and conf.getboolean("config", "paired"):
+                    out_file = star(task_files, dax, base_name, part, common_part, for_file, rev_file)
+                
+                elif conf.getboolean("config", "star") and conf.getboolean("config", "single"):
+                    out_file = star(task_files, dax, base_name, part, common_part, for_file) 
+
                 accepted_hits.append(out_file)
-        
+
             # merge
             merged = merge(dax, base_name + "-" + part, accepted_hits)
 
             parts.append(part)
-            
-        # second level merge 
+
+        # second level merge
         accepted_hits = []
         for part in parts:
             f = File(base_name + "-" + part + "-merged.bam")
@@ -390,6 +474,8 @@ def main():
         j.addArguments("hisat2")
     elif conf.getboolean("config", "tophat2"):
         j.addArguments("tophat2")
+    elif conf.getboolean("config", "star"):
+        j.addArguments("star")
     if conf.getboolean("config", "paired"):
         j.addArguments("paired")
     elif conf.getboolean("config", "single"):
@@ -407,7 +493,7 @@ def main():
     j.uses(f, link=Link.OUTPUT, transfer=True)
     j.uses(g, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
-    
+
     # Write the DAX
     f = open(run_dir + "/workflow/level-2.dax", "w")
     dax.writeXML(f)
@@ -415,4 +501,3 @@ def main():
 
 
 main()
-

@@ -1,3 +1,4 @@
+
 ## William Poehlman ##
 ## LogParse.py v1.1 ##
 ## wpoehlm@clemson.edu ##
@@ -18,6 +19,7 @@ def ParseLogs(trimlist, maplist, software, sample, layout):
     maplist --> a list of hisat2 or tophat2 log files
     software --> read mapping software that generated log files.  'hisat' or 'tophat'
     sample --> A sample number that is present at the beginning of each filename
+    layout --> Sequencing layout.  'single' or 'paired'
 
     output:
     A dictionary, where the sample ID number is the key, and the following statistics are stored in the list value:
@@ -34,10 +36,14 @@ def ParseLogs(trimlist, maplist, software, sample, layout):
 
     ((left mapped reads + right mapped reads)/2)/(cleaned input pairs)
 
+    The overall Alignment rate for STAR is calculated as follows:
+    (uniquely mapped reads + multiple alignments) / (cleaned input pairs)
+
     Logfile names must be formatted as follows:
 
     <sample number>-<unique file identifier>-align_summary.txt (only for tophat)
     <sample number>-<unique file identifier>-fastq-out.txt (for hisat)
+    <sample number>-<unique file identifier>-Log.final.out
     <sample number>-unique file identifier>-fastq-trimmomatic.txt
 
     for example:
@@ -45,7 +51,7 @@ def ParseLogs(trimlist, maplist, software, sample, layout):
     1-000000-000000.fastq-out.txt
     1-000000-000000.fastq-trimmomatic.txt
 
-    NOTE: do not mix log files for tophat and hisat
+    NOTE: do not mix log files for tophat/hisat/star
 
     """
     triminput = []
@@ -133,6 +139,91 @@ def ParseLogs(trimlist, maplist, software, sample, layout):
                 concordantpairs = totalpair - multipair - discordpair
                 concordant.append(concordantpairs)
                 mapped.append(mappedsingles)
+
+    elif software == 'star' and layout == 'paired':
+        multimapped = []
+        uniqmapped = []
+        for file in trimlist:
+            basename = os.path.splitext(file)[0]
+            dataset = basename.split('-')[0]
+            if dataset == sample:
+                for line in open(file):
+                    if 'Input Read Pairs' in line:
+                        inp = int(line.split(' ')[3])
+                        triminput.append(inp)
+                        out = int(line.split(' ')[6])
+                        trimoutput.append(out)
+        for file in maplist:
+            basename = os.path.splitext(file)[0]
+            dataset = basename.split('-')[0]
+            if dataset == sample:
+                count = 0
+                for line in open(file):
+                    count +=1
+                    if count == 9:
+                        uniq = int(line.split('|')[1].strip())
+                        uniqmapped.append(uniq)
+                    if count == 24:
+                        multi = int(line.split('|')[1].strip())
+                        multimapped.append(multi)
+
+
+        concordant = sum(uniqmapped)
+        mult = sum(multimapped)
+        mapped = concordant + mult
+        inputraw = sum(triminput)
+        inputclean = sum(trimoutput)
+        float1 = float(mapped)
+        float2 = float(inputclean)
+        rate = float1/float2
+
+        report[sample] = [inputraw, inputclean, concordant, rate*100]
+
+        return report
+
+    if software == 'star' and layout == 'single':
+        multimapped = []
+        uniqmapped = []
+        for file in trimlist:
+            basename = os.path.splitext(file)[0]
+            dataset = basename.split('-')[0]
+            if dataset == sample:
+                for line in open(file):
+                    if 'Input Reads' in line:
+                        inp = int(line.split(' ')[2])
+                        triminput.append(inp)
+                        out = int(line.split(' ')[4])
+                        trimoutput.append(out)
+        for file in maplist:
+            basename = os.path.splitext(file)[0]
+            dataset = basename.split('-')[0]
+            if dataset == sample:
+                count = 0
+
+                for line in open(file):
+                    count +=1
+                    if count == 9:
+                        uniq = int(line.split('|')[1].strip())
+                        uniqmapped.append(uniq)
+                    if count == 24:
+                        multi = int(line.split('|')[1].strip())
+                        multimapped.append(multi)
+
+        concordant = sum(uniqmapped)
+        mult = sum(multimapped)
+        mapped = concordant + mult
+        inputraw = sum(triminput)
+        inputclean = sum(trimoutput)
+
+        float1 = float(mapped)
+        float2 = float(inputclean)
+        rate = float1/float2
+
+        report[sample] = [inputraw, inputclean, concordant, rate*100]
+
+        return report
+
+
 
     if software == 'tophat2' and layout == 'paired':
 
@@ -252,11 +343,12 @@ def main():
     #locate input log files and append to lists
 
     #tophat alignment summary
-    maploglist = [file for file in glob.glob(('*summary.txt'))]
-
-    if len(maploglist) == 0:
-        #If there are no tophat alignment summaries, look for hisat standard output instead
+    if software == 'tophat2':
+        maploglist = [file for file in glob.glob(('*summary.txt'))]
+    elif software == 'hisat2':
         maploglist = [file for file in glob.glob('*fastq-out.txt')]
+    elif software == 'star':
+        maploglist = [file for file in glob.glob('*Log.final.out')]
 
     trimloglist = [file for file in glob.glob('*-trimmomatic.txt')]
     if len(maploglist) != len(trimloglist):
