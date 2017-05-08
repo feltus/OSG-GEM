@@ -353,10 +353,14 @@ def stringtie(task_files, dax, base_name, merged):
     t = File(base_name + "-t_data.ctab")
     e = File(base_name + "-e_data.ctab")
     i = File(base_name + "-i_data.ctab")
+    x = File(base_name + "-i2t.ctab")
+    z = File(base_name + "-e2t.ctab")
     j.uses(e, link=Link.OUTPUT, transfer=True)
     j.uses(i, link=Link.OUTPUT, transfer=True)
     j.uses(f, link=Link.OUTPUT, transfer=True)
     j.uses(t, link=Link.OUTPUT, transfer=True)
+    j.uses(x, link=Link.OUTPUT, transfer=True)
+    j.uses(z, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
 
     return f

@@ -52,18 +52,30 @@ if conf.getboolean("config", "stringtie") and conf.getboolean("config", "cufflin
 print("\nAdding reference files ...")
 count = 0
 
-for fname in os.listdir(base_dir + "/reference/star_index/"):
-#    if re.search("^" + conf.get("reference", "reference_prefix"), fname):
-#        print("    " + fname)
-#        count += 1
-#    if re.search("^" + conf.get("reference","reference_path"), fname):
+if conf.getboolean("config", "star"):
+
+    for fname in os.listdir(base_dir + "/reference/star_index/"):
 	print("    " + fname)
 	count += 1
 
-if count == 0:
-    print("ERROR: Unable to find reference files in the reference/ directory" +
-          " with the specified prefix: " + conf.get("reference", "reference_prefix"))
-    sys.exit(1)
+
+    if count == 0:
+        print("ERROR: Unable to find reference files in the reference/star_index directory" +
+              " with the specified prefix: " + conf.get("reference", "reference_prefix"))
+        sys.exit(1)
+
+
+else:
+    print("\nAdding reference files ...")
+    count = 0
+    for fname in os.listdir(base_dir + "/reference/"):
+        if re.search("^" + conf.get("reference", "reference_prefix"), fname):
+            print("    " + fname)
+            count += 1
+    if count == 0:
+        print("ERROR: Unable to find reference files in the reference/ directory" +
+              " with the specified prefix: " + conf.get("reference", "reference_prefix"))
+        sys.exit(1)
 
 print("\nAdding gff3 file ...")
 count = 0
