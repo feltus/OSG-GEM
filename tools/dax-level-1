@@ -64,6 +64,17 @@ if conf.getboolean("config", "star"):
               " with the specified prefix: " + conf.get("reference", "reference_prefix"))
         sys.exit(1)
 
+    print("\nAdding gff3 file ...")
+    count = 0
+    for fname in os.listdir(base_dir + "/reference/star_index"):
+        if re.search("\.gff3$", fname):
+            print("    " + fname)
+            count += 1
+    if count != 1:
+        print("ERROR: Unable to find one, and only one, gff3 file in the reference/ directory")
+        sys.exit(1)
+
+
 
 else:
     print("\nAdding reference files ...")
@@ -77,15 +88,16 @@ else:
               " with the specified prefix: " + conf.get("reference", "reference_prefix"))
         sys.exit(1)
 
-print("\nAdding gff3 file ...")
-count = 0
-for fname in os.listdir(base_dir + "/reference/"):
-    if re.search("\.gff3$", fname):
-        print("    " + fname)
-        count += 1
-if count != 1:
-    print("ERROR: Unable to find one, and only one, gff3 file in the reference/ directory")
-    sys.exit(1)
+
+    print("\nAdding gff3 file ...")
+    count = 0
+    for fname in os.listdir(base_dir + "/reference/"):
+        if re.search("\.gff3$", fname):
+            print("    " + fname)
+            count += 1
+    if count != 1:
+        print("ERROR: Unable to find one, and only one, gff3 file in the reference/ directory")
+        sys.exit(1)
 
 # Create a abstract dag
 dax = AutoADAG("gem")
