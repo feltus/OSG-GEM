@@ -45,13 +45,10 @@ A workflow specific ssh key has to be created. This key is used for some of the 
         $ ssh-keygen -t rsa -b 2048 -f ~/.ssh/workflow
           (just hit enter when asked for a passphrase)
           
-        $ cat ~/.ssh/workflow.pub >>~/.ssh/authorized_keys
 
-Test that the key is set up correctly by sshing from login02 to login02, using the new key:
+One you have the ~/.ssh/workflow.pub file, add it to your profile as described in https://support.opensciencegrid.org/support/solutions/articles/12000027675-generate-ssh-key-pair-and-add-the-public-key-to-your-account#step-2-add-the-public-ssh-key-to-login-node
 
-        $ ssh -i ~/.ssh/workflow login02.osgconnect.net
 
-If that works, log out from the new session. You are now ready to submit workflows.
         
 
 ## Example Workflow Setup
