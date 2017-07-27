@@ -173,7 +173,7 @@ if conf.getboolean("config", "paired"):
         prepare_jobs.append(split1)
         prepare_jobs.append(split2)
 
-
+        numsamples = str(input_id)
 elif conf.getboolean("config", "single"):
 
     for key, inputs in conf.items("inputs"):
@@ -212,9 +212,10 @@ elif conf.getboolean("config", "single"):
         split1.addProfile(Profile("hints", "execution.site", "local"))
         dax.addJob(split1)
 
-
+        
         prepare_jobs.append(split1)
-    
+        numsamples = str(input_id)
+
 # generate sub workflow
 j2 = Job(name="dax-level-2")
 j2.addArguments(run_id, base_dir, run_dir)
@@ -245,6 +246,18 @@ else:
 j3.uses(subdax_file, link=Link.INPUT)
 dax.addDAX(j3)
 dax.depends(parent=j2, child=j3)
+
+
+# organize output files for input into ballgown
+
+if conf.getboolean("config", "stringtie"):
+    outpath = str(run_dir) + '/outputs'
+    gown = Job(name="ballgown-wrapper")
+    gown.addArguments(outpath, numsamples)
+    gown.addProfile(Profile("hints", "execution.site", "local"))
+    dax.addJob(gown)
+    
+dax.depends(parent=j3, child=gown)
 
 # Write the DAX to stdout
 f = open("dax.xml", "w")

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e
+
+OUTPATH=$1
+NUMSAMPLES=$2
+
+
+cd $OUTPATH
+mkdir ballgown-data
+
+for i in `seq 1 $NUMSAMPLES` ; do 
+    mkdir ballgown-data/sample-$i
+    mv $i-t_data.ctab ballgown-data/sample-$i/t_data.ctab
+    mv $i-e_data.ctab ballgown-data/sample-$i/e_data.ctab
+    mv $i-i_data.ctab ballgown-data/sample-$i/i_data.ctab
+    mv $i-i2t.ctab ballgown-data/sample-$i/i2t.ctab
+    mv $i-e2t.ctab ballgown-data/sample-$i/e2t.ctab
+done
+
+
+

@@ -327,7 +327,7 @@ def cuff(task_files, dax, base_name, merged):
     # outputs
     f = File(base_name + "-merged_counts.fpkm")
     fpkm_files.append(f)
-    j.uses(f, link=Link.OUTPUT, transfer=True)
+    j.uses(f, link=Link.OUTPUT, transfer=False)
     dax.addJob(j)
 
     return f
@@ -357,7 +357,7 @@ def stringtie(task_files, dax, base_name, merged):
     z = File(base_name + "-e2t.ctab")
     j.uses(e, link=Link.OUTPUT, transfer=True)
     j.uses(i, link=Link.OUTPUT, transfer=True)
-    j.uses(f, link=Link.OUTPUT, transfer=True)
+    j.uses(f, link=Link.OUTPUT, transfer=False)
     j.uses(t, link=Link.OUTPUT, transfer=True)
     j.uses(x, link=Link.OUTPUT, transfer=True)
     j.uses(z, link=Link.OUTPUT, transfer=True)
@@ -497,6 +497,7 @@ def main():
     j.uses(f, link=Link.OUTPUT, transfer=True)
     j.uses(g, link=Link.OUTPUT, transfer=True)
     dax.addJob(j)
+
 
     # Write the DAX
     f = open(run_dir + "/workflow/level-2.dax", "w")
