@@ -355,6 +355,8 @@ def stringtie(task_files, dax, base_name, merged):
     i = File(base_name + "-i_data.ctab")
     x = File(base_name + "-i2t.ctab")
     z = File(base_name + "-e2t.ctab")
+    g = File("sample" + base_name + ".gtf")
+    j.uses(g, link=Link.OUTPUT, transfer=True)
     j.uses(e, link=Link.OUTPUT, transfer=True)
     j.uses(i, link=Link.OUTPUT, transfer=True)
     j.uses(f, link=Link.OUTPUT, transfer=False)

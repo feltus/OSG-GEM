@@ -16,6 +16,7 @@ for i in `seq 1 $NUMSAMPLES` ; do
     mv $i-i_data.ctab ballgown-data/sample-$i/i_data.ctab
     mv $i-i2t.ctab ballgown-data/sample-$i/i2t.ctab
     mv $i-e2t.ctab ballgown-data/sample-$i/e2t.ctab
+    mv sample$i.gtf ballgown-data/sample-$i/sample$i.gtf
 done
 
 
