@@ -56,7 +56,7 @@ One you have the ~/.ssh/workflow.pub file, add it to your profile as described i
 The worklow cloned from github contains an example config file as well as example input files from the 21st chromosome of Gencode Release 24 of the GRCh38 build of the human reference genome.  Two small FASTQ files containing
 200,000 sequences from NCBI dataset SRR1825962 lie within the _Test_data_ directory of the workflow.  To run the test workflow, the user must copy the _osg-gem.config.template_ file:
 
-        $ cp osg-gem.conf.template osg-gem.conf
+        $ cp osg-gem.conf.example osg-gem.conf
 
 The workflow, configured to run Hisat2 and Stringtie, can then be launched by running:
 
