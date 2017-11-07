@@ -325,7 +325,7 @@ def cuff(task_files, dax, base_name, merged):
     j.uses(merged, link=Link.INPUT)
 
     # outputs
-    f = File(base_name + "-merged_counts.fpkm")
+    f = File(base_name + "-fpkm")
     fpkm_files.append(f)
     j.uses(f, link=Link.OUTPUT, transfer=False)
     dax.addJob(j)
@@ -348,7 +348,7 @@ def stringtie(task_files, dax, base_name, merged):
     j.uses(merged, link=Link.INPUT)
 
     # outputs
-    f = File(base_name + "-merged_counts.fpkm")
+    f = File(base_name + "-fpkm")
     fpkm_files.append(f)
     t = File(base_name + "-t_data.ctab")
     e = File(base_name + "-e_data.ctab")

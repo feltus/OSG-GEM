@@ -4,7 +4,7 @@
 #                                                                   #
 #  Alex Feltus <ffeltus@clemson.edu>                                #
 #  First Write: 04-10-2016                                          #
-#  Last Revisit: 04-11-2016                                         #
+#  Last Revisit: 11-07-2016 : remove "rowID" from header(wpoehlm)   #
 #####################################################################
 
 use strict;
@@ -76,7 +76,6 @@ closedir(DIR);
 
 ### Print the stitched matrix
 # Print column headers
-print "RowID\t";
 foreach my $columnheader (@files) {
         print "$columnheader\t";
 }

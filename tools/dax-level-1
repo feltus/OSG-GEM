@@ -123,11 +123,11 @@ input_id = 0
 if conf.getboolean("config", "paired"):
 
     for key, inputs in conf.items("inputs"):
-        input_id += 1
+        input_id = str(key)
 
         inputs = inputs.strip()
 
-        print("Found input: " + inputs)
+        print("Found input " + str(input_id) + ": "  + inputs)
 
         # can either be from the filesystem, remote url, or from a SRA download job
         forward_file = File("forward-" + str(input_id))
