@@ -119,12 +119,12 @@ print(" ")
 
 prepare_jobs = []
 input_id = 0
-
+inputlist = []
 if conf.getboolean("config", "paired"):
 
     for key, inputs in conf.items("inputs"):
         input_id = str(key)
-
+        inputlist.append(input_id)
         inputs = inputs.strip()
 
         print("Found input " + str(input_id) + ": "  + inputs)
@@ -173,7 +173,7 @@ if conf.getboolean("config", "paired"):
         prepare_jobs.append(split1)
         prepare_jobs.append(split2)
 
-        numsamples = str(input_id)
+        numsamples = str(len(inputlist))
 elif conf.getboolean("config", "single"):
 
     for key, inputs in conf.items("inputs"):
@@ -253,7 +253,9 @@ dax.depends(parent=j2, child=j3)
 if conf.getboolean("config", "stringtie"):
     outpath = str(run_dir) + '/outputs'
     gown = Job(name="ballgown-wrapper")
-    gown.addArguments(outpath, numsamples)
+    gown.addArguments(outpath)
+    for i in inputlist:
+        gown.addArguments(str(i))
     gown.addProfile(Profile("hints", "execution.site", "local"))
     dax.addJob(gown)
     
