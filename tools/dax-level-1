@@ -66,7 +66,7 @@ if conf.getboolean("config", "star"):
 
     print("\nAdding gff3 file ...")
     count = 0
-    for fname in os.listdir(base_dir + "/reference/star_index"):
+    for fname in os.listdir(base_dir + "/reference/"):
         if re.search("\.gff3$", fname):
             print("    " + fname)
             count += 1

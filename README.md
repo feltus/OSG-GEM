@@ -145,6 +145,8 @@ SA
 SAindex
 *Splice_Sites.txt
 
+* NOTE: when using STAR, place the gff3 file in the base _reference_ directory
+
 ### User Input Datasets
 
 OSG-GEM supports the processing of multiple input datasets into a single Gene Expression Matrix(GEM).  The user
