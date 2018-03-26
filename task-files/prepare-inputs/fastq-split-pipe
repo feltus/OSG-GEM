@@ -4,6 +4,18 @@ import stat
 import os
 import sys
 import time
+import hashlib
+
+def checksum(fname):
+    """
+    generates a .sha256 file with the checksum of the given file
+    """
+    f = open(fname, 'rb')
+    checksum = hashlib.sha256(f.read()).hexdigest()
+    f.close()
+    f = open(fname + '.sha256', 'w')
+    f.write(checksum)
+    f.close()
 
 def main():
 
@@ -64,6 +76,7 @@ def main():
                 count_seq_file = 0
 
                 outf.close()
+                checksum(outf_filename)
                 outf_filename = "%s/%06d/%s-%06d-%06d.fastq" \
                                 %(out_dir, dir_id, base_name, dir_id, file_id)
                 outf = open(outf_filename, "w", buffering=500*(1024**2))
@@ -76,6 +89,12 @@ def main():
             os.unlink(outf_filename)
         except:
             pass
+        try:
+            os.removedirs("%s/%06d" %(out_dir, dir_id))
+        except:
+            pass
+    else:
+        checksum(outf_filename)
 
     delta = time.time() - perf_start
     print("Total: %d sequences processed. %.0f sequences / s" %(count_seq, count_seq / delta))

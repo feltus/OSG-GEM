@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import ConfigParser
+import hashlib
 
 run_id = sys.argv[1]
 base_dir = sys.argv[2]
@@ -33,6 +34,26 @@ if len(r) != 1:
     sys.exit(1)
 
 
+def add_to_rc(lfn, pfn, site, local_path=None):
+    # Write the DAX
+    f = open(run_dir + "/workflow/level-2.rc", "a")
+    f.write("%s  %s  site=\"%s\"" %(lfn, pfn, site))
+    if local_path:
+        try:
+            # use .sha256 file if it exists
+            if os.path.exists(local_path + ".sha256"):
+                fchk = open(local_path + ".sha256", "r")
+                checksum = fchk.read().replace('\n', '')
+                fchk.close()
+            else:
+                checksum = hashlib.sha256(open(local_path, 'rb').read()).hexdigest()
+            f.write("  checksum.value=\"%s\" checksum.type=\"sha256\"" %checksum)
+        except:
+            pass
+    f.write("\n")
+    f.close()
+
+
 def add_task_files(task_files, dax, job, task_name):
     """
     add a set of input files from the task-files dir to a task
@@ -44,9 +65,12 @@ def add_task_files(task_files, dax, job, task_name):
         if fname not in task_files[task_name]:
             print("Adding task file for " + task_name + ": " + fname)
             task_files[task_name][fname] = File(fname)
-            task_files[task_name][fname].addPFN( \
-                PFN("file://" + base_dir + "/task-files/" + task_name + "/" + fname, "local"))
             dax.addFile(task_files[task_name][fname])
+            # rc entry
+            add_to_rc(fname, 
+                      "file://" + base_dir + "/task-files/" + task_name + "/" + fname,
+                      "local",
+                      base_dir + "/task-files/" + task_name + "/" + fname)
     for f in task_files[task_name]:
         job.uses(f, link=Link.INPUT)
 
@@ -55,23 +79,24 @@ def add_ref_files(dax, job, ref_prefix):
     """
     add a set of reference input files
     """
-
+    global ref_files
 
     if conf.getboolean("config", "star"):
-        global ref_files
         # add to DAX-level replica catalog
         for fname in os.listdir(base_dir + "/reference/star_index/"):
             if fname not in ref_files:
                 ref_files[fname] = File(fname)
-                ref_files[fname].addPFN( \
-                    PFN("file://" + base_dir + "/reference/star_index/" + fname, "local"))
                 dax.addFile(ref_files[fname])
+                # rc entry
+                add_to_rc(fname, 
+                          "file://" + base_dir + "/reference/star_index/" + fname,
+                          "local",
+                          base_dir + "/reference/star_index/" + fname)
         for f in ref_files:
             job.uses(f, link=Link.INPUT)
 
 
     else:
-        global ref_files
         if ref_prefix not in ref_files:
             ref_files[ref_prefix] = {}
         # add to DAX-level replica catalog
@@ -81,9 +106,12 @@ def add_ref_files(dax, job, ref_prefix):
                 continue
             if fname not in ref_files[ref_prefix]:
                 ref_files[ref_prefix][fname] = File(fname)
-                ref_files[ref_prefix][fname].addPFN( \
-                    PFN("file://" + base_dir + "/reference/" + fname, "local"))
                 dax.addFile(ref_files[ref_prefix][fname])
+                # rc entry
+                add_to_rc(fname, 
+                          "file://" + base_dir + "/reference/" + fname,
+                          "local",
+                          base_dir + "/reference/" + fname)
         for f in ref_files[ref_prefix]:
             job.uses(f, link=Link.INPUT)
 
@@ -102,9 +130,12 @@ def add_gff3_file(dax, job):
             continue
         if fname not in gff3_files:
             gff3_files[fname] = File(fname)
-            gff3_files[fname].addPFN( \
-                PFN("file://" + base_dir + "/reference/" + fname, "local"))
             dax.addFile(gff3_files[fname])
+            # rc entry
+            add_to_rc(fname, 
+                      "file://" +  base_dir + "/reference/" + fname,
+                      "local",
+                       base_dir + "/reference/" + fname)
     for f in gff3_files:
         job.uses(f, link=Link.INPUT)
         # should only be one
@@ -383,9 +414,9 @@ def main():
     # Add executables to the DAX-level replica catalog
     for exe_name in os.listdir(base_dir + "/tools/"):
         exe = Executable(name=exe_name, arch="x86_64", installed=False)
-        exe.addPFN(PFN("file://" + base_dir + "/tools/" + exe_name, "local"))
         if exe_name == "tophat" or exe_name == "hisat2":
             exe.addProfile(Profile(Namespace.PEGASUS, "clusters.size", 5))
+        exe.addPFN(PFN("file://" + base_dir + "/tools/" + exe_name, "local"))
         exe.addProfile(Profile(Namespace.CONDOR, "request_memory", memory))
         dax.addExecutable(exe)
 
@@ -406,6 +437,9 @@ def main():
 
             accepted_hits = []
             for in_name in os.listdir(my_data_dir):
+            
+                if "sha256" in in_name:
+                    continue
 
                 # only need the forward file
                 if not "forward" in in_name:
@@ -426,13 +460,21 @@ def main():
                 common_part = re.sub("\.gz", "", common_part)
 
                 for_file = File(base_name + "-forward-" + common_part)
-                for_file.addPFN(PFN(base_url + "/" + base_name + "-forward-" + common_part, site_name))
                 dax.addFile(for_file)
+                # rc entry
+                add_to_rc(base_name + "-forward-" + common_part, 
+                          base_url + "/" + base_name + "-forward-" + common_part,
+                          site_name,
+                          run_dir + "/data/" + base_name + "/" + part + "/" + base_name + "-forward-" + common_part)
 
                 if conf.getboolean("config", "paired"):
                     rev_file = File(base_name + "-reverse-" + common_part)
-                    rev_file.addPFN(PFN(base_url + "/" + base_name + "-reverse-" + common_part, site_name))
                     dax.addFile(rev_file)
+                    # rc entry
+                    add_to_rc(base_name + "-reverse-" + common_part, 
+                              base_url + "/" + base_name + "-reverse-" + common_part,
+                              site_name,
+                              run_dir + "/data/" + base_name + "/" + part + "/" + base_name + "-reverse-" + common_part)
 
                 if conf.getboolean("config", "hisat2") and conf.getboolean("config", "paired"):
                     out_file = hisat2(task_files, dax, base_name, part, common_part, for_file, rev_file)
@@ -455,6 +497,7 @@ def main():
                 accepted_hits.append(out_file)
 
             # merge
+            print("merge: " + base_name + "-" + part)
             merged = merge(dax, base_name + "-" + part, accepted_hits)
 
             parts.append(part)

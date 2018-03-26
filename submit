@@ -9,7 +9,8 @@ if [ -e /stash2 ]; then
     module load xrootd
     module load stashcp
     
-    module load pegasus
+    #module load pegasus
+    export PATH=/cvmfs/oasis.opensciencegrid.org/osg/projects/pegasus/rhel6/4.9.0dev/bin:$PATH
     
     TOPDIR=`pwd`
     
