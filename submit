@@ -3,14 +3,20 @@
 set -e
 
 # are we on OSG Connect?
-if [ -e /stash2 ]; then
+if [ -e /stash -o -e /stash2 ]; then
+
+    HNAME=`hostname -f`
+    if [ "x$HNAME" != "xlogin03.osgconnect.net" ]; then
+        echo "This workflow has to be submitted from login03.osgconnect.net"
+        exit 1
+    fi
 
     # needed for stashcp to be picked up the site catalog for the local site
-    module load xrootd
-    module load stashcp
-    
-    #module load pegasus
-    export PATH=/cvmfs/oasis.opensciencegrid.org/osg/projects/pegasus/rhel6/4.9.0dev/bin:$PATH
+    #module load xrootd
+    #module load stashcp
+   
+    export PATH=/cvmfs/oasis.opensciencegrid.org/osg/projects/stashcp/writeback:$PATH
+    export PATH=/home/rynge/git/pegasus/dist/pegasus-4.9.0dev/bin:$PATH
     
     TOPDIR=`pwd`
     
