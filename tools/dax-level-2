@@ -415,7 +415,10 @@ def main():
     for exe_name in os.listdir(base_dir + "/tools/"):
         exe = Executable(name=exe_name, arch="x86_64", installed=False)
         if exe_name == "tophat" or exe_name == "hisat2":
-            exe.addProfile(Profile(Namespace.PEGASUS, "clusters.size", 5))
+            # It would be good if we could automatically dial clustering up
+            # based on low runtimes of tophat/hisat2. I wonder if we could
+            # use something like the size of the reference?
+            exe.addProfile(Profile(Namespace.PEGASUS, "clusters.size", 1))
         exe.addPFN(PFN("file://" + base_dir + "/tools/" + exe_name, "local"))
         exe.addProfile(Profile(Namespace.CONDOR, "request_memory", memory))
         dax.addExecutable(exe)
@@ -448,7 +451,7 @@ def main():
                 # use stash urls for the data so we can bypass and grab it directly from
                 # the jobs (OSG Connect uses stash)
                 if os.path.exists("/stash2"):
-                    base_url = "http://stash.osgconnect.net/~" + getpass.getuser() + "/" + run_id + \
+                    base_url = "stash:///user/" + getpass.getuser() + "/public/" + run_id + \
                                "/data/" + base_name + "/" + part
                     site_name = "stash"
                 else:

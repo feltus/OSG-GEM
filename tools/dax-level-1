@@ -227,12 +227,13 @@ for job in prepare_jobs:
 # sub workflow job
 j3 = DAX("level-2.dax")
 # are we on OSG Connect?
-if os.path.exists("/stash2"):
+if os.path.exists("/stash") or os.path.exists("/stash2"):
     j3.addArguments("-Dpegasus.catalog.site.file=%s/sites.xml" % (run_dir),
                     "-Dpegasus.catalog.replica.file=%s/workflow/level-2.rc" % (run_dir),
                     "--sites", "condorpool",
                     "--staging-site", "stash",
                     "--output-site", "local",
+                    "--cluster", "horizontal",
                     "--basename", "level-2",
                     "--force",
                     "--cleanup", "none")
@@ -242,6 +243,7 @@ else:
                     "--sites", "jetstream-condorpool",
                     "--staging-site", "jetstream-staging",
                     "--output-site", "local",
+                    "--cluster", "horizontal",
                     "--basename", "level-2",
                     "--force",
                     "--cleanup", "none")
