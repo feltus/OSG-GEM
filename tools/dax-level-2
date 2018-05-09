@@ -522,6 +522,7 @@ def main():
 
     # merge all the fpkms
     j = Job(name="gem-merge")
+    j.addArguments(run_id)
     if conf.getboolean("config", "hisat2"):
         j.addArguments("hisat2")
     elif conf.getboolean("config", "tophat2"):
@@ -534,16 +535,13 @@ def main():
         j.addArguments("single")
     # inputs
     add_task_files(task_files, dax, j, "gem-merge")
-    for f in fpkm_files:
-        j.uses(f, link=Link.INPUT)
-    for g in log_files:
-        j.uses(g, link=Link.INPUT)
 
     # outputs
     f = File("merged_GEM.tab")
     g = File("QC_Report.tab")
     j.uses(f, link=Link.OUTPUT, transfer=True)
     j.uses(g, link=Link.OUTPUT, transfer=True)
+    j.addProfile(Profile("hints", "execution.site", "local"))
     dax.addJob(j)
 
 

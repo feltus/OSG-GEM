@@ -9,6 +9,7 @@
             <file-server operation="all" url="file://${RUN_DIR}/outputs"/>
         </directory>
         <profile namespace="pegasus" key="SSH_PRIVATE_KEY" >${HOME}/.ssh/workflow</profile>
+        <profile namespace="env" key="USER" >${USER}</profile>
         <profile namespace="env" key="PATH" >${PATH}</profile>
         <profile namespace="env" key="LD_LIBRARY_PATH" >${LD_LIBRARY_PATH}</profile>
         <profile namespace="condor" key="+WantsStashCache" >True</profile>

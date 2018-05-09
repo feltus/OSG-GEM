@@ -1,37 +1,55 @@
 #!/bin/bash
 
-SOFTWARE=$1
-LAYOUT=$2
+RUN_ID=$1
+SOFTWARE=$2
+LAYOUT=$3
+
+START_DIR=`pwd`
 
 set -e
 
-# remove "empty" inputs
-for F in `ls *-fpkm`; do
-        SIZE=`du -sb $F | cut -f 1`
-        if [ $SIZE -lt 50 ]; then
-                echo "Removing $F due to it being empty"
-                rm $F
-        fi
+# figure out where our scratch dir is
+SCRATCH_DIR=""
+#for DER in "/stash2/user/$USER/public/$RUN_ID"; do
+for DER in \
+    "/stash2/user/$USER/public/$RUN_ID" \
+    "/stash2/user/wpoehlm/public/$RUN_ID" \
+    ; do
+    echo "Checking potential scratch location: $DER"
+    if [ -e $DER ]; then
+        SCRATCH_DIR=$DER
+    fi
 done
+if [ "X$SCRATCH_DIR" = "X" ]; then
+    echo "ERROR: Unable to determine the scratch dir"
+    exit 1
+fi
 
-echo
-echo
-ls -l
-echo
-echo
+cd $SCRATCH_DIR
+mkdir -p fpkm/inputs
+
+cd fpkm/inputs
+
+# copy all "non-empty" inputs
+find ../../00 -name \*-fpkm -size +50 -exec ln -f -s {} \;
+
+cd ../
+
+find ../00 -name \*summary.txt -exec ln -f -s {} \;
+find ../00 -name \*fastq-out.txt -exec ln -f -s {} \;
+find ../00 -name \*Log.final.out -exec ln -f -s {} \;
+find ../00 -name \*-trimmomatic.txt -exec ln -f -s {} \;
 
 # no input files left
-COUNT=`ls *-fpkm 2>/dev/null | wc -l`
+COUNT=`ls inputs/*-fpkm 2>/dev/null | wc -l`
 if [ $COUNT = 0 ]; then
     echo "No fpmk files left - creating an empty .tab"
-    touch merged_GEM.tab
+    touch $START_DIR/merged_GEM.tab
+    touch $START_DIR/QC_Report.tab
     exit 0
 fi
 
-# move all the input files into a subdir
-mkdir inputs
-mv *-fpkm inputs/
+perl $START_DIR/GEM_merge.pl inputs/ > $START_DIR/merged_GEM.tab
 
-perl GEM_merge.pl inputs/ > merged_GEM.tab
+python $START_DIR/Log_merge.py $SOFTWARE $LAYOUT > $START_DIR/QC_Report.tab
 
-python Log_merge.py $SOFTWARE $LAYOUT >> QC_Report.tab
