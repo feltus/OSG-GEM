@@ -45,9 +45,9 @@ if [ $LAYOUT = "paired" ] ; then
          exit 0
      fi
 
-     unzip hisat2-2.0.4-Linux_x86_64.zip
+     unzip hisat2-2.1.0-Linux_x86_64.zip
 
-     hisat2-2.0.4/hisat2 --no-temp-splicesite --known-splicesite-infile ./$REF_PREFIX.Splice_Sites.txt -x ./$REF_PREFIX -q -1 ./left_result.paired_trim.forward_$COMMON_NAME.fastq -2 ./right_result.paired_trim.reverse_$COMMON_NAME.fastq -S $BASE_NAME-$COMMON_NAME.hits.sam -t --dta-cufflinks 2>&1 | tee $BASE_NAME-$COMMON_NAME-out.txt
+     hisat2-2.1.0/hisat2 --no-temp-splicesite --known-splicesite-infile ./$REF_PREFIX.Splice_Sites.txt -x ./$REF_PREFIX -q -1 ./left_result.paired_trim.forward_$COMMON_NAME.fastq -2 ./right_result.paired_trim.reverse_$COMMON_NAME.fastq -S $BASE_NAME-$COMMON_NAME.hits.sam -t --dta-cufflinks 2>&1 | tee $BASE_NAME-$COMMON_NAME-out.txt
 
 
 elif [ $LAYOUT = "single" ] ; then
@@ -67,9 +67,9 @@ elif [ $LAYOUT = "single" ] ; then
         exit 0
     fi
 
-    unzip hisat2-2.0.4-Linux_x86_64.zip
+    unzip hisat2-2.1.0-Linux_x86_64.zip
 
-    hisat2-2.0.4/hisat2 --no-temp-splicesite --known-splicesite-infile ./$REF_PREFIX.Splice_Sites.txt -x ./$REF_PREFIX -U left_result.paired_trim.forward_$COMMON_NAME.fastq -S $BASE_NAME-$COMMON_NAME.hits.sam -t --dta-cufflinks 2>&1 | tee $BASE_NAME-$COMMON_NAME-out.txt
+    hisat2-2.1.0/hisat2 --no-temp-splicesite --known-splicesite-infile ./$REF_PREFIX.Splice_Sites.txt -x ./$REF_PREFIX -U left_result.paired_trim.forward_$COMMON_NAME.fastq -S $BASE_NAME-$COMMON_NAME.hits.sam -t --dta-cufflinks 2>&1 | tee $BASE_NAME-$COMMON_NAME-out.txt
 fi
 # we only need the accepted hits, but it needs a unique name
 mv $BASE_NAME-$COMMON_NAME.hits.sam $BASE_NAME-$COMMON_NAME-accepted_hits.sam
