@@ -7,8 +7,10 @@
 
 set -e
 
-module load samtools/1.3.1
-module load java/8u25
+module load jdk/8u141-b15-x
+module load gcc/6.2.0-l
+module load samtools/1.6-r
+module load unzip/6.0-f
 
 set -v
 set -o pipefail

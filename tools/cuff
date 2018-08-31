@@ -7,8 +7,8 @@
 
 set -e
 
-module load java/8u25
-module load cufflinks/2.2.1
+module load jdk/8u141-b15-x
+module load cufflinks/2.2.1-6
 
 set -v
 

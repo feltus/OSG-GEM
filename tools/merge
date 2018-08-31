@@ -7,8 +7,9 @@
 
 set -e
 
-module load samtools/1.3.1
-module load java/8u25
+module load jdk/8u141-b15-x
+module load gcc/6.2.0-l
+module load samtools/1.6-r
 
 # 1 input file is possible, but samtools can't handle that
 COUNT=`ls *.bam | wc -l`
